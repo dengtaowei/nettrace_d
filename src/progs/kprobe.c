@@ -1,13 +1,8 @@
 #define KBUILD_MODNAME ""
-#include <kheaders.h>
-#include <bpf/bpf_helpers.h>
-#include <bpf/bpf_endian.h>
-#include <bpf/bpf_tracing.h>
 
+#include "skb_parse.h"
 #include "shared.h"
 #include "core.h"
-
-#include "kprobe_trace.h"
 
 #define pt_regs_param_0 PT_REGS_PARM1
 #define pt_regs_param_1 PT_REGS_PARM2

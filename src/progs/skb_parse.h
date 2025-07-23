@@ -7,6 +7,10 @@
 #ifndef _H_BPF_SKB_UTILS
 #define _H_BPF_SKB_UTILS
 
+#include <kheaders.h>
+#include <bpf/bpf_helpers.h>
+#include <bpf/bpf_endian.h>
+#include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
 #include "skb_macro.h"
@@ -46,6 +50,7 @@ const volatile bool bpf_func_exist[BPF_LOCAL_FUNC_MAX] = {0};
 #endif
 
 #define skb_cb(__skb) ((void *)(__skb) + bpf_core_field_offset(typeof(*__skb), cb))
+#define __ptr(a) ((void *)(a))
 
 #define CONFIG() ({						\
 	int _key = 0;						\
@@ -439,7 +444,7 @@ static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
 
 	switch (l4_proto) {
 	case IPPROTO_TCP: {
-		struct tcp_sock *tp = (void *)sk;
+		struct tcp_sock *tp = __ptr(sk);
 
 		if (bpf_core_type_exists(struct tcp_sock)) {
 			ske->l4.tcp.packets_out = _C(tp, packets_out);
@@ -472,7 +477,7 @@ static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
 	if (!bpf_core_type_exists(struct inet_connection_sock))
 		return 0;
 
-	icsk = (void *)sk;
+	icsk = __ptr(sk);
 	bpf_probe_read_kernel(&ske->ca_state, sizeof(u8),
 		(u8 *)icsk +
 		bpf_core_field_offset(struct inet_connection_sock,
@@ -566,7 +571,7 @@ static inline int probe_parse_skb_sk(struct sock *sk, struct sk_buff *skb,
 	/* parse L4 information from the socket */
 	switch (l4_proto) {
 	case IPPROTO_TCP: {
-		struct tcp_sock *tp = (void *)sk;
+		struct tcp_sock *tp = __ptr(sk);
 		struct tcp_skb_cb *cb;
 
 		cb = skb_cb(skb);
@@ -664,7 +669,7 @@ static __always_inline int probe_parse_skb(struct sk_buff *skb, struct sock *sk,
 		/* mac header is set properly, we can use it directly. */
 		struct ethhdr *eth = ctx->data + ctx->mac_header;
 
-		l3 = (void *)eth + ETH_HLEN;
+		l3 = __ptr(eth) + ETH_HLEN;
 		l3_proto = bpf_ntohs(_(eth->h_proto));
 	}
 
@@ -697,9 +702,9 @@ static inline int direct_parse_skb(struct __sk_buff *skb, packet_t *pkt,
 				   pkt_args_t *bpf_args)
 {
 	struct ethhdr *eth = SKB_DATA(skb);
-	struct iphdr *ip = (void *)(eth + 1);
+	struct iphdr *ip = __ptr(eth + 1);
 
-	if ((void *)ip > SKB_END(skb))
+	if (__ptr(ip) > SKB_END(skb))
 		goto err;
 
 	if (bpf_args && args_check(bpf_args, l3_proto, eth->h_proto))
@@ -714,8 +719,8 @@ static inline int direct_parse_skb(struct __sk_buff *skb, packet_t *pkt,
 			 args_check(bpf_args, daddr, ip->daddr)))
 		goto err;
 
-	l4_min_t *l4_p = (void *)(ip + 1);
-	struct tcphdr *tcp = (void *)l4_p;
+	l4_min_t *l4_p = __ptr(ip + 1);
+	struct tcphdr *tcp = __ptr(l4_p);
 
 	switch (ip->protocol) {
 	case IPPROTO_UDP:
@@ -733,7 +738,7 @@ fill_port:
 		pkt->l4.min = *l4_p;
 		break;
 	case IPPROTO_ICMP: {
-		struct icmphdr *icmp = (void *)l4_p;
+		struct icmphdr *icmp = __ptr(l4_p);
 		if (SKB_CHECK_ICMP(skb))
 			goto err;
 

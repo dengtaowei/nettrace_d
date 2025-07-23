@@ -1,8 +1,6 @@
 #ifndef _H_PROG_CORE
 #define _H_PROG_CORE
 
-#include "skb_parse.h"
-
 typedef struct {
 	u16 func1;
 	u16 func2;
