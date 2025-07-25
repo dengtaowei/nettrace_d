@@ -23,19 +23,14 @@
 	SEC("fexit/"#target)					\
 	int TRACE_RET_NAME(name)(void **ctx)			\
 	{							\
-		context_info_t info;				\
-		u64 __retval = 0;				\
-		if (pre_handle_exit(ctx, INDEX_##name, &__retval, acount)) \
-			return 0;				\
-		info = (context_info_t) {0};			\
-		/* initialize info only after the check pass */	\
-		info = (context_info_t) {			\
+		context_info_t info = {				\
 			.func = INDEX_##name,			\
 			.ctx = ctx,				\
 			.args = (void *)CONFIG(),		\
-			.retval = __retval,			\
 			info_init				\
 		};						\
+		if (handle_exit(&info, INDEX_##name, acount))	\
+			return 0;				\
 		if (pre_handle_entry(&info, INDEX_##name))	\
 			return 0;				\
 		handle_entry_finish(&info, fake__##name(&info));\
@@ -105,9 +100,8 @@
 	}
 #define FNC(name)
 
-static __always_inline int pre_handle_exit(void *ctx, int func_index,
-					   u64 *retval,
-					   int arg_count);
+static __always_inline int handle_exit(context_info_t *info, int func_index,
+				       int arg_count);
 static inline int default_handle_entry(context_info_t *info);
 /* we don't need to get/put kernel function to pair the entry and exit in
  * TRACING program.
@@ -118,15 +112,35 @@ static inline int default_handle_entry(context_info_t *info);
 
 rules_ret_t rules_all[TRACE_MAX];
 
-static __always_inline int pre_handle_exit(void *ctx, int func_index,
-					   u64 *retval,
-					   int arg_count)
+static __always_inline int handle_retrule()
+{
+
+}
+
+static __always_inline int get_ret_val(context_info_t *info, int arg_count)
+{
+	void *ret_ptr;
+
+	if (bpf_core_helper_exist(get_func_ret)) {
+		bpf_get_func_ret(ctx, &info->retval);
+	} else {
+		if (!arg_count)
+			return -EINVAL;
+		ret_ptr = ctx + arg_count * 8;
+		bpf_probe_read_kernel(&info->retval, sizeof(u64), ret_ptr);
+	}
+
+	return 0;
+}
+
+static __always_inline int handle_exit(context_info_t *info, int func_index,
+				       int arg_count)
 {
 	int i, expected, ret;
 	rules_ret_t *rules;
 	bool hit = false;
-	void *ret_ptr;
 
+	info->func_status = get_func_status(info->args, func);
 	/* this can't happen */
 	if (func_index >= TRACE_MAX)
 		goto no_match;
@@ -136,14 +150,7 @@ static __always_inline int pre_handle_exit(void *ctx, int func_index,
 		goto no_match;
 
 	*retval = 0;
-	if (bpf_core_helper_exist(get_func_ret)) {
-		bpf_get_func_ret(ctx, retval);
-	} else {
-		if (!arg_count)
-			goto no_match;
-		ret_ptr = ctx + arg_count * 8;
-		bpf_probe_read_kernel(retval, sizeof(u64), ret_ptr);
-	}
+
 
 	ret = (int)*retval;
 	pr_bpf_debug("func=%d retval=%d\n", func_index, ret);
@@ -178,3 +185,26 @@ static __always_inline int pre_handle_exit(void *ctx, int func_index,
 no_match:
 	return -1;
 }
+
+// static inline int handle_exit(struct pt_regs *ctx, int func)
+// {
+// 	bpf_args_t *args = (void *)CONFIG();
+// 	retevent_t event;
+
+// 	if (!args->ready || put_ret(args, func))
+// 		return 0;
+
+// 	event = (retevent_t) {
+// 		.ts = bpf_ktime_get_ns(),
+// 		.func = func,
+// 		.meta = FUNC_TYPE_RET,
+// 		.val = PT_REGS_RC(ctx),
+// 		.pid = (u32)bpf_get_current_pid_tgid(),
+// 	};
+
+// 	if (func == INDEX_skb_clone)
+// 		init_ctx_match((void *)event.val, func, false);
+
+// 	EVENT_OUTPUT(ctx, event);
+// 	return 0;
+// }

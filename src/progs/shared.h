@@ -29,7 +29,7 @@ typedef struct {
 	u32  latency_min;
 	int  __rate_limit;
 	u64  __last_update;
-	u8   trace_status[TRACE_MAX];
+	u16  trace_status[TRACE_MAX];
 	u64  event_count;
 } bpf_args_t;
 
@@ -105,6 +105,8 @@ enum {
 #define FUNC_STATUS_STACK	(1 << 4)
 #define FUNC_STATUS_RET		(1 << 5)
 #define FUNC_STATUS_CFREE	(1 << 6) /* custom skb free function */
+#define FUNC_STATUS_ENTRY	(1 << 7)
+#define FUNC_STATUS_RETRULE	(1 << 8)
 
 #undef DEFINE_EVENT
 #define DEFINE_EVENT(name, fields...)		\
