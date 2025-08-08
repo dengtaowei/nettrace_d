@@ -1,14 +1,14 @@
-CFLAGS		+= -I./ -I$(ROOT)/shared/bpf/ -g
+CFLAGS		+= -I./ -I$(ROOT)/shared/bpf/ -I$(ROOT)/3rdparty/install/$(ARCH)/include -g
 BPF_CFLAGS	= $(CFLAGS) -Wno-unused-function			\
 		  -Wno-compare-distinct-pointer-types -Wuninitialized	\
 		  -D__TARGET_ARCH_$(SRCARCH) -DBPF_NO_PRESERVE_ACCESS_INDEX
 
-ifeq ("$(shell pkg-config --print-requires-private libelf | grep libzstd)","libzstd")
-LIBELF_ZSTD_FLAGS = -lzstd
-endif
+# ifeq ("$(shell pkg-config --print-requires-private libelf | grep libzstd)","libzstd")
+# LIBELF_ZSTD_FLAGS = -lzstd
+# endif
 
 HOST_CFLAGS	= \
-		-lbpf -lelf -lz $(LIBELF_ZSTD_FLAGS) -O2 -static $(CFLAGS) -Wall \
+		-L$(ROOT)/3rdparty/install/$(ARCH)/lib -lbpf -lelf -lz $(LIBELF_ZSTD_FLAGS) -O2 -static $(CFLAGS) -Wall \
 		-Wno-deprecated-declarations -DVERSION=$(VERSION)	\
 		-DRELEASE=$(RELEASE)					\
 		-I$(ROOT)/shared/ -I$(ROOT)/utils
@@ -26,8 +26,7 @@ USERINCLUDE	:= \
 		-I$(HEADERS)/arch/$(SRCARCH)/include/generated/uapi \
 		-I$(HEADERS)/include/uapi \
 		-I$(HEADERS)/include/generated/uapi \
-		-include $(HEADERS)/include/linux/kconfig.h \
-		-I/usr/include/
+		-include $(HEADERS)/include/linux/kconfig.h
 
 LINUXINCLUDE	:= \
 		-I$(HEADERS)/arch/$(SRCARCH)/include \

@@ -1,0 +1,34 @@
+
+
+make 3rdparty/clean
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- CC=arm-linux-gnueabihf-gcc 3rdparty/compile
+
+
+
+
+make NO_BTF=1 NO_GLOBAL_DATA=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc install
+
+
+# x86
+make 3rdparty/clean
+make 3rdparty/compile
+make NO_BTF=1 NO_GLOBAL_DATA=1 ARCH=x86 install
+make NO_GLOBAL_DATA=1 ARCH=x86 install
+
+
+# arm64
+make 3rdparty/clean
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc 3rdparty/compile
+
+make NO_BTF=1 NO_GLOBAL_DATA=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc KERNEL=/home/anlan/Desktop/perf/linux-6.6.23 install
+
+
+
+
+
+# kernel
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig
+
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- menuconfig
+
+make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
