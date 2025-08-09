@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/x86/usr/bin/nettrace",
-            "args": ["-p", "icmp", "--debug"],
+            "args": ["-p", "icmp", "--debug", "--bpf-debug"],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
             "environment": [],

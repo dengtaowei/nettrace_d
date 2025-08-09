@@ -1,0 +1,9 @@
+
+//// bpf prog how to handler a pkt
+ping-46634   [000] ...21  9234.837276: bpf_trace_printk: nettrace: skb=ffff9f317055d900, begin to handle, func=65
+
+ping-46634   [000] ...21  9234.837360: bpf_trace_printk: nettrace: skb=ffff9f317055d900, begin to parse, nh=16 mh=65535
+
+ping-46634   [000] ...21  9234.837361: bpf_trace_printk: nettrace: skb=ffff9f317055d900, l3=2048
+
+ping-46634   [000] ...21  9234.837362: bpf_trace_printk: nettrace: skb=ffff9f317055d900, pkt matched

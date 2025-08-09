@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "vmlinux_arm64.h": "c"
+        "vmlinux_arm64.h": "c",
+        "random": "cpp"
     }
 }
