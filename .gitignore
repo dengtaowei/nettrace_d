@@ -1,8 +1,10 @@
+!.vscode
 __pycache__
 *.pyc
 output
 *.skel.h
 *.o
+.*
 GPATH
 GTAGS
 GRTAGS
@@ -11,8 +13,3 @@ build*.sh
 release.sh
 compile_commands.json
 testing
-.git*
-.read*
-.keep
-.cmake*
-.mail*
