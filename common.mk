@@ -28,11 +28,13 @@ USERINCLUDE	:= \
 		-I$(HEADERS)/include/generated/uapi \
 		-include $(HEADERS)/include/linux/kconfig.h
 
+ifndef BPF_MAKE_HEADERS
 LINUXINCLUDE	:= \
 		-I$(HEADERS)/arch/$(SRCARCH)/include \
 		-I$(HEADERS)/arch/$(SRCARCH)/include/generated \
 		-I$(HEADERS)/include \
 		$(USERINCLUDE)
+endif
 
 KERNEL_CFLAGS	+= $(NOSTDINC_FLAGS) $(LINUXINCLUDE) \
 		-D__KERNEL__ -Wno-unused-value -Wno-pointer-sign \
@@ -43,6 +45,10 @@ KERNEL_CFLAGS	+= $(NOSTDINC_FLAGS) $(LINUXINCLUDE) \
 
 ifdef KERN_VER
 	CFLAGS		+= -DKERN_VER=$(KERN_VER)
+endif
+
+ifdef BPF_MAKE_HEADERS
+	CFLAGS		+= -DBPF_MAKE_HEADERS
 endif
 
 ifdef NO_GLOBAL_DATA

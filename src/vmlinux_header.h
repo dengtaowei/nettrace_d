@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MulanPSL-2.0
+#if !defined(BPF_MAKE_HEADERS)
 
 #include <uapi/linux/in.h>
 #include <uapi/linux/ip.h>
@@ -27,4 +28,15 @@
 #include <net/netfilter/nf_tables.h>
 #else
 #define NT_DISABLE_NFT
+#endif
+
+#else
+#define NT_DISABLE_NFT 1
+#if defined(__TARGET_ARCH_x86)
+#include "./progs/kheaders/x86/kheaders_x86.h"
+#elif defined(__TARGET_ARCH_arm64)
+#include "./progs/vmlinux_arm64.h"
+#elif defined(__TARGET_ARCH_loongarch)
+#include "./progs/vmlinux_loongarch64.h"
+#endif
 #endif
