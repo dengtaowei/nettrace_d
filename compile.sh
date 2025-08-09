@@ -40,3 +40,12 @@ make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 
 # build with docker
 sudo docker run -d -it --name arm64 --network host -v $(pwd):$(pwd) --platform linux/arm64 arm64_env tail -f /dev/null
+
+
+###### tools
+# bpftool
+make check_feat=0 EXTRA_LDFLAGS="-L../../../3rdparty/install/x86/lib --static"
+
+make check_feat=0 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc EXTRA_LDFLAGS="-L../../../3rdparty/install/arm64/lib --static"
+
+make check_feat=0 CROSS_COMPILE=arm-linux-gnueabihf- CC=arm-linux-gnueabihf-gcc EXTRA_LDFLAGS="-L../../../3rdparty/install/arm/lib --static"
