@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "vmlinux_arm64.h": "c",
-        "random": "cpp"
+        "random": "cpp",
+        "functional": "c",
+        "kprobe_trace.h": "c"
     }
 }
