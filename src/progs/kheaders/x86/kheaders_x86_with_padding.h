@@ -29257,1192 +29257,357 @@ typedef u32 xdp_features_t;
 
 typedef unsigned int zap_flags_t;
 
-struct iphdr {
-	__u8 ihl: 4;
-	__u8 version: 4;
-	__u8 tos;
-	__be16 tot_len;
-	__be16 id;
-	__be16 frag_off;
-	__u8 ttl;
-	__u8 protocol;
-	__sum16 check;
-	union {
-		struct {
-			__be32 saddr;
-			__be32 daddr;
-		};
-		struct {
-			__be32 saddr;
-			__be32 daddr;
-		} addrs;
-	};
-};
+struct iphdr
+{
+    __u8 ihl : 4;
+    __u8 version : 4;
+    __u8 tos;
+    __be16 tot_len;
+    __be16 id;
+    __be16 frag_off;
+    __u8 ttl;
+    __u8 protocol;
+    __sum16 check;
+    union
+    {
+        struct
+        {
+            __be32 saddr;
+            __be32 daddr;
+        };
+        struct
+        {
+            __be32 saddr;
+            __be32 daddr;
+        } addrs;
+    };
+} __attribute__((__packed__));
 
-struct tcphdr {
-	__be16 source;
-	__be16 dest;
-	__be32 seq;
-	__be32 ack_seq;
-	__u16 res1: 4;
-	__u16 doff: 4;
-	__u16 fin: 1;
-	__u16 syn: 1;
-	__u16 rst: 1;
-	__u16 psh: 1;
-	__u16 ack: 1;
-	__u16 urg: 1;
-	__u16 ece: 1;
-	__u16 cwr: 1;
-	__be16 window;
-	__sum16 check;
-	__be16 urg_ptr;
-};
+struct tcphdr
+{
+    __be16 source;
+    __be16 dest;
+    __be32 seq;
+    __be32 ack_seq;
+    __u16 res1 : 4;
+    __u16 doff : 4;
+    __u16 fin : 1;
+    __u16 syn : 1;
+    __u16 rst : 1;
+    __u16 psh : 1;
+    __u16 ack : 1;
+    __u16 urg : 1;
+    __u16 ece : 1;
+    __u16 cwr : 1;
+    __be16 window;
+    __sum16 check;
+    __be16 urg_ptr;
+} __attribute__((__packed__));
 
-struct udphdr {
-	__be16 source;
-	__be16 dest;
-	__be16 len;
-	__sum16 check;
-};
+struct udphdr
+{
+    __be16 source;
+    __be16 dest;
+    __be16 len;
+    __sum16 check;
+} __attribute__((__packed__));
 
-struct icmphdr {
-	__u8 type;
-	__u8 code;
-	__sum16 checksum;
-	union {
-		struct {
-			__be16 id;
-			__be16 sequence;
-		} echo;
-		__be32 gateway;
-		struct {
-			__be16 __unused;
-			__be16 mtu;
-		} frag;
-		__u8 reserved[4];
-	} un;
-};
+struct icmphdr
+{
+    __u8 type;
+    __u8 code;
+    __sum16 checksum;
+    union
+    {
+        struct
+        {
+            __be16 id;
+            __be16 sequence;
+        } echo;
+        __be32 gateway;
+        struct
+        {
+            __be16 __unused;
+            __be16 mtu;
+        } frag;
+        __u8 reserved[4];
+    } un;
+} __attribute__((__packed__));
 
-struct in6_addr {
-	union {
-		__u8 u6_addr8[16];
-		__be16 u6_addr16[8];
-		__be32 u6_addr32[4];
-	} in6_u;
-};
+struct in6_addr
+{
+    union
+    {
+        __u8 u6_addr8[16];
+        __be16 u6_addr16[8];
+        __be32 u6_addr32[4];
+    } in6_u;
+} __attribute__((__packed__));
 
-struct ipv6hdr {
-	__u8 priority: 4;
-	__u8 version: 4;
-	__u8 flow_lbl[3];
-	__be16 payload_len;
-	__u8 nexthdr;
-	__u8 hop_limit;
-	union {
-		struct {
-			struct in6_addr saddr;
-			struct in6_addr daddr;
-		};
-		struct {
-			struct in6_addr saddr;
-			struct in6_addr daddr;
-		} addrs;
-	};
-};
+struct ipv6hdr
+{
+    __u8 priority : 4;
+    __u8 version : 4;
+    __u8 flow_lbl[3];
+    __be16 payload_len;
+    __u8 nexthdr;
+    __u8 hop_limit;
+    union
+    {
+        struct
+        {
+            struct in6_addr saddr;
+            struct in6_addr daddr;
+        };
+        struct
+        {
+            struct in6_addr saddr;
+            struct in6_addr daddr;
+        } addrs;
+    };
+} __attribute__((__packed__));
 
-struct tcp_sock {
-	// struct inet_connection_sock inet_conn;
-	// __u8 __cacheline_group_begin__tcp_sock_read_tx[0];
-	// u32 max_window;
-	// u32 rcv_ssthresh;
-	// u32 reordering;
-	// u32 notsent_lowat;
-	// u16 gso_segs;
-	// struct sk_buff *lost_skb_hint;
-	// struct sk_buff *retransmit_skb_hint;
-	// __u8 __cacheline_group_end__tcp_sock_read_tx[0];
-	// __u8 __cacheline_group_begin__tcp_sock_read_txrx[0];
-	// u32 tsoffset;
-	// u32 snd_wnd;
-	// u32 mss_cache;
-	// u32 snd_cwnd;
-	// u32 prr_out;
-	// u32 lost_out;
-	// u32 sacked_out;
-	// u16 tcp_header_len;
-	// u8 scaling_ratio;
-	// u8 chrono_type: 2;
-	// u8 repair: 1;
-	// u8 tcp_usec_ts: 1;
-	// u8 is_sack_reneg: 1;
-	// u8 is_cwnd_limited: 1;
-	// __u8 __cacheline_group_end__tcp_sock_read_txrx[0];
-	// __u8 __cacheline_group_begin__tcp_sock_read_rx[0];
-	// u32 copied_seq;
-	// u32 rcv_tstamp;
-	// u32 snd_wl1;
-	// u32 tlp_high_seq;
-	// u32 rttvar_us;
-	char fill_1[1476];
-	u32 retrans_out;  // dtwdebug /*  1476     4 */
-	// u16 advmss;
-	// u16 urg_data;
-	// u32 lost;
-	// struct minmax rtt_min;
-	// struct rb_root out_of_order_queue;
-	// u32 snd_ssthresh;
-	// __u8 __cacheline_group_end__tcp_sock_read_rx[0];
-	// long: 64;
-	// __u8 __cacheline_group_begin__tcp_sock_write_tx[0];
-	// u32 segs_out;
-	// u32 data_segs_out;
-	// u64 bytes_sent;
-	// u32 snd_sml;
-	// u32 chrono_start;
-	// u32 chrono_stat[3];
-	// u32 write_seq;
-	// u32 pushed_seq;
-	// u32 lsndtime;
-	// u32 mdev_us;
-	// u64 tcp_wstamp_ns;
-	// u64 tcp_clock_cache;
-	// u64 tcp_mstamp;
-	// u32 rtt_seq;
-	// struct list_head tsorted_sent_queue;
-	// struct sk_buff *highest_sack;
-	// u8 ecn_flags;
-	// __u8 __cacheline_group_end__tcp_sock_write_tx[0];
-	// __u8 __cacheline_group_begin__tcp_sock_write_txrx[0];
-	// __be32 pred_flags;
-	char fill_2[176];
-	u32 rcv_nxt;  // dtwdebug /*  1656     4 */
-	// u32 snd_nxt;
-	char fill_3[4];
-	u32 snd_una;  // dtwdebug /*  1664     4 */
-	// u32 window_clamp;
-	// u32 srtt_us;
-	char fill_4[8];
-	u32 packets_out;  // dtwdebug /*  1676     4 */
-	// u32 snd_up;
-	// u32 delivered;
-	// u32 delivered_ce;
-	// u32 app_limited;
-	// u32 rcv_wnd;
-	// struct tcp_options_received rx_opt;
-	// u8 nonagle: 4;
-	// u8 rate_app_limited: 1;
-	// __u8 __cacheline_group_end__tcp_sock_write_txrx[0];
-	// __u8 __cacheline_group_begin__tcp_sock_write_rx[0];
-	// u64 bytes_received;
-	// u32 segs_in;
-	// u32 data_segs_in;
-	// u32 rcv_wup;
-	// u32 max_packets_out;
-	// u32 cwnd_usage_seq;
-	// u32 rate_delivered;
-	// u32 rate_interval_us;
-	// u32 rcv_rtt_last_tsecr;
-	// u64 first_tx_mstamp;
-	// u64 delivered_mstamp;
-	// u64 bytes_acked;
-	// struct {
-	// 	u32 rtt_us;
-	// 	u32 seq;
-	// 	u64 time;
-	// } rcv_rtt_est;
-	// struct {
-	// 	u32 space;
-	// 	u32 seq;
-	// 	u64 time;
-	// } rcvq_space;
-	// __u8 __cacheline_group_end__tcp_sock_write_rx[0];
-	// u32 dsack_dups;
-	// u32 last_oow_ack_time;
-	// u32 compressed_ack_rcv_nxt;
-	// struct list_head tsq_node;
-	// struct tcp_rack rack;
-	// u8 compressed_ack;
-	// u8 dup_ack_counter: 2;
-	// u8 tlp_retrans: 1;
-	// u8 unused: 5;
-	// u8 thin_lto: 1;
-	// u8 recvmsg_inq: 1;
-	// u8 fastopen_connect: 1;
-	// u8 fastopen_no_cookie: 1;
-	// u8 fastopen_client_fail: 2;
-	// u8 frto: 1;
-	// u8 repair_queue;
-	// u8 save_syn: 2;
-	// u8 syn_data: 1;
-	// u8 syn_fastopen: 1;
-	// u8 syn_fastopen_exp: 1;
-	// u8 syn_fastopen_ch: 1;
-	// u8 syn_data_acked: 1;
-	// u32 tcp_tx_delay;
-	// u32 mdev_max_us;
-	// u8 keepalive_probes;
-	// u32 reord_seen;
-	// u32 snd_cwnd_cnt;
-	// u32 snd_cwnd_clamp;
-	// u32 snd_cwnd_used;
-	// u32 snd_cwnd_stamp;
-	// u32 prior_cwnd;
-	// u32 prr_delivered;
-	// struct hrtimer pacing_timer;
-	// struct hrtimer compressed_ack_timer;
-	// struct sk_buff *ooo_last_skb;
-	// struct tcp_sack_block duplicate_sack[1];
-	// struct tcp_sack_block selective_acks[4];
-	// struct tcp_sack_block recv_sack_cache[4];
-	// int lost_cnt_hint;
-	// u32 prior_ssthresh;
-	// u32 high_seq;
-	// u32 retrans_stamp;
-	// u32 undo_marker;
-	// int undo_retrans;
-	// u64 bytes_retrans;
-	// u32 total_retrans;
-	// u32 rto_stamp;
-	// u16 total_rto;
-	// u16 total_rto_recoveries;
-	// u32 total_rto_time;
-	// u32 urg_seq;
-	// unsigned int keepalive_time;
-	// unsigned int keepalive_intvl;
-	// int linger2;
-	// u8 bpf_sock_ops_cb_flags;
-	// u8 bpf_chg_cc_inprogress: 1;
-	// u16 timeout_rehash;
-	// u32 rcv_ooopack;
-	// struct {
-	// 	u32 probe_seq_start;
-	// 	u32 probe_seq_end;
-	// } mtu_probe;
-	// u32 plb_rehash;
-	// u32 mtu_info;
-	// bool is_mptcp;
-	// bool (*smc_hs_congested)(const struct sock *);
-	// bool syn_smc;
-	// const struct tcp_sock_af_ops *af_specific;
-	// struct tcp_md5sig_info *md5sig_info;
-	// struct tcp_ao_info *ao_info;
-	// struct tcp_fastopen_request *fastopen_req;
-	// struct request_sock *fastopen_rsk;
-	// struct saved_syn *saved_syn;
-	// long: 64; /*  2288     8 */
-};
+struct tcp_sock
+{
+    char fill_1[1476];
+    u32 retrans_out; // dtwdebug /*  1476     4 */
+    char fill_2[176];
+    u32 rcv_nxt; // dtwdebug /*  1656     4 */
+    char fill_3[4];
+    u32 snd_una; // dtwdebug /*  1664     4 */
+    char fill_4[8];
+    u32 packets_out; // dtwdebug /*  1676     4 */
+    char fill_5[624];
+} __attribute__((__packed__));
 
-struct timer_list {
-	// struct hlist_node entry;
-	char fill_1[16];
-	long unsigned int expires; // dtwdebug /*    16     8 */
-	// void (*function)(struct timer_list *);
-	// u32 flags;
-};
+struct timer_list
+{
+    char fill_1[16];
+    long unsigned int expires; // dtwdebug /*    16     8 */
+    char fill_2[16];
+} __attribute__((__packed__));
 
-struct inet_connection_sock {
-	// struct inet_sock icsk_inet;
-	// struct request_sock_queue icsk_accept_queue;
-	// struct inet_bind_bucket *icsk_bind_hash;
-	// struct inet_bind2_bucket *icsk_bind2_hash;
-	char fill_1[1072];
-	long unsigned int icsk_timeout; /*  1072     8 */
-	struct timer_list icsk_retransmit_timer; /*  1080    40 */
-	// struct timer_list icsk_delack_timer;
-	// __u32 icsk_rto;
-	// __u32 icsk_rto_min;
-	// __u32 icsk_delack_max;
-	// __u32 icsk_pmtu_cookie;
-	// const struct tcp_congestion_ops *icsk_ca_ops;
-	// const struct inet_connection_sock_af_ops *icsk_af_ops;
-	// const struct tcp_ulp_ops *icsk_ulp_ops;
-	// void *icsk_ulp_data;
-	// void (*icsk_clean_acked)(struct sock *, u32);
-	// unsigned int (*icsk_sync_mss)(struct sock *, u32);
-	// __u8 icsk_ca_state: 5;
-	// __u8 icsk_ca_initialized: 1;
-	// __u8 icsk_ca_setsockopt: 1;
-	// __u8 icsk_ca_dst_locked: 1;
-	char fill_2[105];
-	__u8 icsk_retransmits; /*  1225     1 */
-	__u8 icsk_pending; /*  1226     1 */
-	// __u8 icsk_backoff;
-	// __u8 icsk_syn_retries;
-	// __u8 icsk_probes_out;
-	// __u16 icsk_ext_hdr_len;
-	// struct {
-	// 	__u8 pending;
-	// 	__u8 quick;
-	// 	__u8 pingpong;
-	// 	__u8 retry;
-	// 	__u32 ato: 8;
-	// 	__u32 lrcv_flowlabel: 20;
-	// 	__u32 unused: 4;
-	// 	long unsigned int timeout;
-	// 	__u32 lrcvtime;
-	// 	__u16 last_seg_size;
-	// 	__u16 rcv_mss;
-	// } icsk_ack;
-	// struct {
-	// 	int search_high;
-	// 	int search_low;
-	// 	u32 probe_size: 31;
-	// 	u32 enabled: 1;
-	// 	u32 probe_timestamp;
-	// } icsk_mtup;
-	// u32 icsk_probes_tstamp;
-	// u32 icsk_user_timeout;
-	// u64 icsk_ca_priv[13];
-};
+struct inet_connection_sock
+{
+    char fill_1[1072];
+    long unsigned int icsk_timeout;             /*  1072     8 */
+    struct timer_list icsk_retransmit_timer; /*  1080    40 */
+    char fill_2[105];
+    __u8 icsk_retransmits; /*  1225     1 */
+    __u8 icsk_pending;     /*  1226     1 */
+    char fill_3[157];
+} __attribute__((__packed__));
 
-struct sock_common {
-	union {
-		__addrpair skc_addrpair; /*     0     8 */
-		struct {
-			__be32 skc_daddr; /*     0     4 */
-			__be32 skc_rcv_saddr; /*     4     4 */
-		};
-	};
-	// union {
-	// 	unsigned int skc_hash;
-	// 	__u16 skc_u16hashes[2];
-	// };
-	char fill_1[4];
-	union {
-		__portpair skc_portpair; /*    12     4 */
-		struct {
-			__be16 skc_dport; /*    12     2 */
-			__u16 skc_num; /*    14     2 */
-		};
-	};
-	short unsigned int skc_family; /*    16     2 */
-	volatile unsigned char skc_state; /*    18     1 */
-	// unsigned char skc_reuse: 4;
-	// unsigned char skc_reuseport: 1;
-	// unsigned char skc_ipv6only: 1;
-	// unsigned char skc_net_refcnt: 1;
-	// int skc_bound_dev_if;
-	// union {
-	// 	struct hlist_node skc_bind_node;
-	// 	struct hlist_node skc_portaddr_node;
-	// };
-	// struct proto *skc_prot;
-	// possible_net_t skc_net;
-	char fill_2[37];
-	struct in6_addr skc_v6_daddr; /*    56    16 */
-	struct in6_addr skc_v6_rcv_saddr; /*    72    16 */
-	// atomic64_t skc_cookie;
-	// union {
-	// 	long unsigned int skc_flags;
-	// 	struct sock *skc_listener;
-	// 	struct inet_timewait_death_row *skc_tw_dr;
-	// };
-	// int skc_dontcopy_begin[0];
-	// union {
-	// 	struct hlist_node skc_node;
-	// 	struct hlist_nulls_node skc_nulls_node;
-	// };
-	// short unsigned int skc_tx_queue_mapping;
-	// short unsigned int skc_rx_queue_mapping;
-	// union {
-	// 	int skc_incoming_cpu;
-	// 	u32 skc_rcv_wnd;
-	// 	u32 skc_tw_rcv_nxt;
-	// };
-	// refcount_t skc_refcnt;
-	// int skc_dontcopy_end[0];
-	// union {
-	// 	u32 skc_rxhash;
-	// 	u32 skc_window_clamp;
-	// 	u32 skc_tw_snd_nxt;
-	// };
-};
+struct sock_common
+{
+    union
+    {
+        __addrpair skc_addrpair; /*     0     8 */
+        struct
+        {
+            __be32 skc_daddr;     /*     0     4 */
+            __be32 skc_rcv_saddr; /*     4     4 */
+        };
+    };
+    char fill_1[4];
+    union
+    {
+        __portpair skc_portpair; /*    12     4 */
+        struct
+        {
+            __be16 skc_dport; /*    12     2 */
+            __u16 skc_num;    /*    14     2 */
+        };
+    };
+    short unsigned int skc_family;    /*    16     2 */
+    volatile unsigned char skc_state; /*    18     1 */
+    char fill_2[37];
+    struct in6_addr skc_v6_daddr;     /*    56    16 */
+    struct in6_addr skc_v6_rcv_saddr; /*    72    16 */
+    char fill_3[48];
+} __attribute__((__packed__));
 
-struct ip_esp_hdr {
-	__be32 spi;
-	__be32 seq_no;
-	__u8 enc_data[0];
-};
+struct ip_esp_hdr
+{
+    __be32 spi;
+    __be32 seq_no;
+    __u8 enc_data[0];
+} __attribute__((__packed__));
 
-struct tcp_skb_cb {
-	__u32 seq; /*     0     4 */
-	// __u32 end_seq;
-	// union {
-	// 	__u32 tcp_tw_isn;
-	// 	struct {
-	// 		u16 tcp_gso_segs;
-	// 		u16 tcp_gso_size;
-	// 	};
-	// };
-	char fill_1[8];
-	__u8 tcp_flags; /*    12     1 */
-	// __u8 sacked;
-	// __u8 ip_dsfield;
-	// __u8 txstamp_ack: 1;
-	// __u8 eor: 1;
-	// __u8 has_rxtstamp: 1;
-	// __u8 unused: 5;
-	// __u32 ack_seq;
-	// union {
-	// 	struct {
-	// 		__u32 is_app_limited: 1;
-	// 		__u32 delivered_ce: 20;
-	// 		__u32 unused: 11;
-	// 		__u32 delivered;
-	// 		u64 first_tx_mstamp;
-	// 		u64 delivered_mstamp;
-	// 	} tx;
-	// 	union {
-	// 		struct inet_skb_parm h4;
-	// 		struct inet6_skb_parm h6;
-	// 	} header;
-	// };
-};
+struct tcp_skb_cb
+{
+    __u32 seq; /*     0     4 */
+    char fill_1[8];
+    __u8 tcp_flags; /*    12     1 */
+    char fill_2[32];
+} __attribute__((__packed__));
 
-struct ethhdr {
-	unsigned char h_dest[6];
-	unsigned char h_source[6];
-	__be16 h_proto;
-};
+struct ethhdr
+{
+    unsigned char h_dest[6];
+    unsigned char h_source[6];
+    __be16 h_proto;
+} __attribute__((__packed__));
 
-struct __sk_buff {
-	// __u32 len;
-	// __u32 pkt_type;
-	// __u32 mark;
-	// __u32 queue_mapping;
-	// __u32 protocol;
-	// __u32 vlan_present;
-	// __u32 vlan_tci;
-	// __u32 vlan_proto;
-	// __u32 priority;
-	// __u32 ingress_ifindex;
-	// __u32 ifindex;
-	// __u32 tc_index;
-	// __u32 cb[5];
-	// __u32 hash;
-	// __u32 tc_classid;
-	char fill_1[76];
-	__u32 data; /*    76     4 */
-	__u32 data_end; /*    80     4 */
-	// __u32 napi_id;
-	// __u32 family;
-	// __u32 remote_ip4;
-	// __u32 local_ip4;
-	// __u32 remote_ip6[4];
-	// __u32 local_ip6[4];
-	// __u32 remote_port;
-	// __u32 local_port;
-	// __u32 data_meta;
-	// union {
-	// 	struct bpf_flow_keys *flow_keys;
-	// };
-	// __u64 tstamp;
-	// __u32 wire_len;
-	// __u32 gso_segs;
-	// union {
-	// 	struct bpf_sock *sk;
-	// };
-	// __u32 gso_size;
-	// __u8 tstamp_type;
-	// __u64 hwtstamp;
-};
+struct __sk_buff
+{
+    char fill_1[76];
+    __u32 data;     /*    76     4 */
+    __u32 data_end; /*    80     4 */
+    char fill_2[108];
+} __attribute__((__packed__));
 
-struct netdev_queue {
-	// struct net_device *dev;
-	// netdevice_tracker dev_tracker;
-	// struct Qdisc *qdisc;
-	// struct Qdisc *qdisc_sleeping;
-	// struct kobject kobj;
-	// int numa_node;
-	// long unsigned int tx_maxrate;
-	// atomic_long_t trans_timeout;
-	// struct net_device *sb_dev;
-	// struct xsk_buff_pool *pool;
-	// struct napi_struct *napi;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// spinlock_t _xmit_lock;
-	// int xmit_lock_owner;
-	char fill_1[200];
-	long unsigned int trans_start; /*   200     8 */
-	long unsigned int state; /*   208     8 */
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// struct dql dql;
-};
+struct netdev_queue
+{
+    char fill_1[200];
+    long unsigned int trans_start; /*   200     8 */
+    long unsigned int state;       /*   208     8 */
+    char fill_2[168];
+} __attribute__((__packed__));
 
+struct net_device
+{
+    char fill_1[224];
+    int ifindex; /*   224     4 */
+    char fill_2[76];
+    char name[16]; /*   304    16 */
+    char fill_3[2192];
+} __attribute__((__packed__));
 
-struct net_device {
-	// __u8 __cacheline_group_begin__net_device_read_tx[0];
-	// long long unsigned int priv_flags;
-	// const struct net_device_ops *netdev_ops;
-	// const struct header_ops *header_ops;
-	// struct netdev_queue *_tx;
-	// netdev_features_t gso_partial_features;
-	// unsigned int real_num_tx_queues;
-	// unsigned int gso_max_size;
-	// unsigned int gso_ipv4_max_size;
-	// u16 gso_max_segs;
-	// s16 num_tc;
-	// unsigned int mtu;
-	// short unsigned int needed_headroom;
-	// struct netdev_tc_txq tc_to_txq[16];
-	// struct xps_dev_maps *xps_maps[2];
-	// struct nf_hook_entries *nf_hooks_egress;
-	// struct bpf_mprog_entry *tcx_egress;
-	// __u8 __cacheline_group_end__net_device_read_tx[0];
-	// __u8 __cacheline_group_begin__net_device_read_txrx[0];
-	// union {
-	// 	struct pcpu_lstats *lstats;
-	// 	struct pcpu_sw_netstats *tstats;
-	// 	struct pcpu_dstats *dstats;
-	// };
-	// long unsigned int state;
-	// unsigned int flags;
-	// short unsigned int hard_header_len;
-	// netdev_features_t features;
-	// struct inet6_dev *ip6_ptr;
-	// __u8 __cacheline_group_end__net_device_read_txrx[0];
-	// __u8 __cacheline_group_begin__net_device_read_rx[0];
-	// struct bpf_prog *xdp_prog;
-	// struct list_head ptype_specific;
-	char fill_1[224];
-	int ifindex; /*   224     4 */
-	// unsigned int real_num_rx_queues;
-	// struct netdev_rx_queue *_rx;
-	// long unsigned int gro_flush_timeout;
-	// u32 napi_defer_hard_irqs;
-	// unsigned int gro_max_size;
-	// unsigned int gro_ipv4_max_size;
-	// rx_handler_func_t *rx_handler;
-	// void *rx_handler_data;
-	// possible_net_t nd_net;
-	// struct netpoll_info *npinfo;
-	// struct bpf_mprog_entry *tcx_ingress;
-	// __u8 __cacheline_group_end__net_device_read_rx[0];
-	char fill_2[76];
-	char name[16]; /*   304    16 */
-	// struct netdev_name_node *name_node;
-	// struct dev_ifalias *ifalias;
-	// long unsigned int mem_end;
-	// long unsigned int mem_start;
-	// long unsigned int base_addr;
-	// struct list_head dev_list;
-	// struct list_head napi_list;
-	// struct list_head unreg_list;
-	// struct list_head close_list;
-	// struct list_head ptype_all;
-	// struct {
-	// 	struct list_head upper;
-	// 	struct list_head lower;
-	// } adj_list;
-	// xdp_features_t xdp_features;
-	// const struct xdp_metadata_ops *xdp_metadata_ops;
-	// const struct xsk_tx_metadata_ops *xsk_tx_metadata_ops;
-	// short unsigned int gflags;
-	// short unsigned int needed_tailroom;
-	// netdev_features_t hw_features;
-	// netdev_features_t wanted_features;
-	// netdev_features_t vlan_features;
-	// netdev_features_t hw_enc_features;
-	// netdev_features_t mpls_features;
-	// unsigned int min_mtu;
-	// unsigned int max_mtu;
-	// short unsigned int type;
-	// unsigned char min_header_len;
-	// unsigned char name_assign_type;
-	// int group;
-	// struct net_device_stats stats;
-	// struct net_device_core_stats *core_stats;
-	// atomic_t carrier_up_count;
-	// atomic_t carrier_down_count;
-	// const struct iw_handler_def *wireless_handlers;
-	// struct iw_public_data *wireless_data;
-	// const struct ethtool_ops *ethtool_ops;
-	// const struct l3mdev_ops *l3mdev_ops;
-	// const struct ndisc_ops *ndisc_ops;
-	// const struct xfrmdev_ops *xfrmdev_ops;
-	// const struct tlsdev_ops *tlsdev_ops;
-	// unsigned char operstate;
-	// unsigned char link_mode;
-	// unsigned char if_port;
-	// unsigned char dma;
-	// unsigned char perm_addr[32];
-	// unsigned char addr_assign_type;
-	// unsigned char addr_len;
-	// unsigned char upper_level;
-	// unsigned char lower_level;
-	// short unsigned int neigh_priv_len;
-	// short unsigned int dev_id;
-	// short unsigned int dev_port;
-	// short unsigned int padded;
-	// spinlock_t addr_list_lock;
-	// int irq;
-	// struct netdev_hw_addr_list uc;
-	// struct netdev_hw_addr_list mc;
-	// struct netdev_hw_addr_list dev_addrs;
-	// struct kset *queues_kset;
-	// unsigned int promiscuity;
-	// unsigned int allmulti;
-	// bool uc_promisc;
-	// struct in_device *ip_ptr;
-	// struct vlan_info *vlan_info;
-	// struct dsa_port *dsa_ptr;
-	// struct tipc_bearer *tipc_ptr;
-	// void *atalk_ptr;
-	// struct ax25_dev *ax25_ptr;
-	// struct wireless_dev *ieee80211_ptr;
-	// struct wpan_dev *ieee802154_ptr;
-	// struct mpls_dev *mpls_ptr;
-	// struct mctp_dev *mctp_ptr;
-	// const unsigned char *dev_addr;
-	// unsigned int num_rx_queues;
-	// unsigned int xdp_zc_max_segs;
-	// struct netdev_queue *ingress_queue;
-	// struct nf_hook_entries *nf_hooks_ingress;
-	// unsigned char broadcast[32];
-	// struct cpu_rmap *rx_cpu_rmap;
-	// struct hlist_node index_hlist;
-	// unsigned int num_tx_queues;
-	// struct Qdisc *qdisc;
-	// unsigned int tx_queue_len;
-	// spinlock_t tx_global_lock;
-	// struct xdp_dev_bulk_queue *xdp_bulkq;
-	// struct hlist_head qdisc_hash[16];
-	// struct timer_list watchdog_timer;
-	// int watchdog_timeo;
-	// u32 proto_down_reason;
-	// struct list_head todo_list;
-	// int *pcpu_refcnt;
-	// struct ref_tracker_dir refcnt_tracker;
-	// struct list_head link_watch_list;
-	// enum {
-	// 	NETREG_UNINITIALIZED = 0,
-	// 	NETREG_REGISTERED = 1,
-	// 	NETREG_UNREGISTERING = 2,
-	// 	NETREG_UNREGISTERED = 3,
-	// 	NETREG_RELEASED = 4,
-	// 	NETREG_DUMMY = 5,
-	// } reg_state: 8;
-	// bool dismantle;
-	// enum {
-	// 	RTNL_LINK_INITIALIZED = 0,
-	// 	RTNL_LINK_INITIALIZING = 1,
-	// } rtnl_link_state: 16;
-	// bool needs_free_netdev;
-	// void (*priv_destructor)(struct net_device *);
-	// void *ml_priv;
-	// enum netdev_ml_priv_type ml_priv_type;
-	// enum netdev_stat_type pcpu_stat_type: 8;
-	// struct garp_port *garp_port;
-	// struct mrp_port *mrp_port;
-	// struct dm_hw_stat_delta *dm_private;
-	// struct device dev;
-	// const struct attribute_group *sysfs_groups[4];
-	// const struct attribute_group *sysfs_rx_queue_group;
-	// const struct rtnl_link_ops *rtnl_link_ops;
-	// unsigned int tso_max_size;
-	// u16 tso_max_segs;
-	// const struct dcbnl_rtnl_ops *dcbnl_ops;
-	// u8 prio_tc_map[16];
-	// unsigned int fcoe_ddp_xid;
-	// struct netprio_map *priomap;
-	// struct phy_device *phydev;
-	// struct sfp_bus *sfp_bus;
-	// struct lock_class_key *qdisc_tx_busylock;
-	// bool proto_down;
-	// unsigned int wol_enabled: 1;
-	// unsigned int threaded: 1;
-	// struct list_head net_notifier_list;
-	// const struct macsec_ops *macsec_ops;
-	// const struct udp_tunnel_nic_info *udp_tunnel_nic_info;
-	// struct udp_tunnel_nic *udp_tunnel_nic;
-	// struct bpf_xdp_entity xdp_state[3];
-	// u8 dev_addr_shadow[32];
-	// netdevice_tracker linkwatch_dev_tracker;
-	// netdevice_tracker watchdog_dev_tracker;
-	// netdevice_tracker dev_registered_tracker;
-	// struct rtnl_hw_stats64 *offload_xstats_l3;
-	// struct devlink_port *devlink_port;
-	// struct dpll_pin *dpll_pin;
-	// struct hlist_head page_pools;
-};
+struct nf_hook_state
+{
+    u8 hook; /*     0     1 */
+    u8 pf;   /*     1     1 */
+} __attribute__((__packed__));
 
+struct qdisc_skb_head
+{
+    char fill_1[16];
+    __u32 qlen; /*    16     4 */
+    char fill_2[4];
+} __attribute__((__packed__));
 
-struct nf_hook_state {
-	u8 hook; /*     0     1 */
-	u8 pf; /*     1     1 */
-	// struct net_device *in;
-	// struct net_device *out;
-	// struct sock *sk;
-	// struct net *net;
-	// int (*okfn)(struct net *, struct sock *, struct sk_buff *);
-};
-
-struct qdisc_skb_head {
-	// struct sk_buff *head;
-	// struct sk_buff *tail;
-	char fill_1[16];
-	__u32 qlen; /*    16     4 */
-	// spinlock_t lock;
-};
-
-struct Qdisc {
-	// int (*enqueue)(struct sk_buff *, struct Qdisc *, struct sk_buff **);
-	// struct sk_buff * (*dequeue)(struct Qdisc *);
-	char fill_1[16];
-	unsigned int flags; /*    16     4 */
-	// u32 limit;
-	// const struct Qdisc_ops *ops;
-	// struct qdisc_size_table *stab;
-	// struct hlist_node hash;
-	// u32 handle;
-	// u32 parent;
-	char fill_2[44];
-	struct netdev_queue *dev_queue; /*    64     8 */
-	// struct net_rate_estimator *rate_est;
-	// struct gnet_stats_basic_sync *cpu_bstats;
-	// struct gnet_stats_queue *cpu_qstats;
-	// int pad;
-	// refcount_t refcnt;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// struct sk_buff_head gso_skb;
-	char fill_3[80];
-	struct qdisc_skb_head q; /*   152    24 */
-	// struct gnet_stats_basic_sync bstats;
-	// struct gnet_stats_queue qstats;
-	// int owner;
-	// long unsigned int state;
-	// long unsigned int state2;
-	// struct Qdisc *next_sched;
-	// struct sk_buff_head skb_bad_txq;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// spinlock_t busylock;
-	// spinlock_t seqlock;
-	// struct callback_head rcu;
-	// netdevice_tracker dev_tracker;
-	// struct lock_class_key root_lock_key;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// long int privdata[0];
-};
-
+struct Qdisc
+{
+    char fill_1[16];
+    unsigned int flags; /*    16     4 */
+    char fill_2[44];
+    struct netdev_queue *dev_queue; /*    64     8 */
+    char fill_3[80];
+    struct qdisc_skb_head q; /*   152    24 */
+    char fill_4[208];
+} __attribute__((__packed__));
 
 typedef unsigned int nf_hookfn(void *, struct sk_buff *, const struct nf_hook_state *);
 
-struct nf_hook_entry {
-	nf_hookfn *hook;
-	void *priv;
-};
+struct nf_hook_entry
+{
+    nf_hookfn *hook;
+    void *priv;
+} __attribute__((__packed__));
 
-struct nf_hook_entries {
-	u16 num_hook_entries;
-	struct nf_hook_entry hooks[0];
-};
+struct nf_hook_entries
+{
+    u16 num_hook_entries;
+    struct nf_hook_entry hooks[0];
+} __attribute__((__packed__));
 
-struct pt_regs {
-	long unsigned int r15;
-	long unsigned int r14;
-	long unsigned int r13;
-	long unsigned int r12;
-	long unsigned int bp;
-	long unsigned int bx;
-	long unsigned int r11;
-	long unsigned int r10;
-	long unsigned int r9;
-	long unsigned int r8;
-	long unsigned int ax;
-	long unsigned int cx;
-	long unsigned int dx;
-	long unsigned int si;
-	long unsigned int di;
-	long unsigned int orig_ax;
-	long unsigned int ip;
-	// union {
-	// 	u16 cs;
-	// 	u64 csx;
-	// 	struct fred_cs fred_cs;
-	// };
-	// long unsigned int flags;
-	// long unsigned int sp;
-	// union {
-	// 	u16 ss;
-	// 	u64 ssx;
-	// 	struct fred_ss fred_ss;
-	// };
-};
+struct pt_regs
+{
+    long unsigned int r15;
+    long unsigned int r14;
+    long unsigned int r13;
+    long unsigned int r12;
+    long unsigned int bp;
+    long unsigned int bx;
+    long unsigned int r11;
+    long unsigned int r10;
+    long unsigned int r9;
+    long unsigned int r8;
+    long unsigned int ax;
+    long unsigned int cx;
+    long unsigned int dx;
+    long unsigned int si;
+    long unsigned int di;
+    long unsigned int orig_ax;
+    long unsigned int ip;
+} __attribute__((__packed__));
 
-struct sk_buff {
-	union {
-		struct {
-			struct sk_buff *next;
-			struct sk_buff *prev;
-			union {
-				struct net_device *dev;  /*    16     8 */
-				// long unsigned int dev_scratch;
-			};
-		};
-		// struct rb_node rbnode;
-		// struct list_head list;
-		// struct llist_node ll_node;
-	};
-	struct sock *sk;  /*    24     8 */
-	// union {
-	// 	ktime_t tstamp;
-	// 	u64 skb_mstamp_ns;
-	// };
-	char fill_0[8];
-	char cb[48];  /*    40    48 */
-	// union {
-	// 	struct {
-	// 		long unsigned int _skb_refdst;
-	// 		void (*destructor)(struct sk_buff *);
-	// 	};
-	// 	struct list_head tcp_tsorted_anchor;
-	// 	long unsigned int _sk_redir;
-	// };
-	// long unsigned int _nfct;
-	// unsigned int len;
-	// unsigned int data_len;
-	// __u16 mac_len;
-	// __u16 hdr_len;
-	// __u16 queue_mapping;
-	// __u8 __cloned_offset[0];
-	// __u8 cloned: 1;
-	// __u8 nohdr: 1;
-	// __u8 fclone: 2;
-	// __u8 peeked: 1;
-	// __u8 head_frag: 1;
-	// __u8 pfmemalloc: 1;
-	// __u8 pp_recycle: 1;
-	// __u8 active_extensions; /*   127     1 */
-	char fill_1[40];
-	union {
-		struct {
-	// 		__u8 __pkt_type_offset[0]; /*   128     0 */
-	// 		__u8 pkt_type: 3;
-	// 		__u8 ignore_df: 1;
-	// 		__u8 dst_pending_confirm: 1;
-	// 		__u8 ip_summed: 2;
-	// 		__u8 ooo_okay: 1;
-	// 		__u8 __mono_tc_offset[0];
-	// 		__u8 mono_delivery_time: 1;
-	// 		__u8 tc_at_ingress: 1;
-	// 		__u8 tc_skip_classify: 1;
-	// 		__u8 remcsum_offload: 1;
-	// 		__u8 csum_complete_sw: 1;
-	// 		__u8 csum_level: 2;
-	// 		__u8 inner_protocol_type: 1;
-	// 		__u8 l4_hash: 1;
-	// 		__u8 sw_hash: 1;
-	// 		__u8 wifi_acked_valid: 1;
-	// 		__u8 wifi_acked: 1;
-	// 		__u8 no_fcs: 1;
-	// 		__u8 encapsulation: 1;
-	// 		__u8 encap_hdr_csum: 1;
-	// 		__u8 csum_valid: 1;
-	// 		__u8 ndisc_nodetype: 2;
-	// 		__u8 ipvs_property: 1;
-	// 		__u8 nf_trace: 1;
-	// 		__u8 offload_fwd_mark: 1;
-	// 		__u8 offload_l3_fwd_mark: 1;
-	// 		__u8 redirected: 1;
-	// 		__u8 from_ingress: 1;
-	// 		__u8 nf_skip_egress: 1;
-	// 		__u8 decrypted: 1;
-	// 		__u8 slow_gro: 1;
-	// 		__u8 csum_not_inet: 1;
-	// 		__u16 tc_index;
-	// 		u16 alloc_cpu;
-	// 		union {
-	// 			__wsum csum;
-	// 			struct {
-	// 				__u16 csum_start;
-	// 				__u16 csum_offset;
-	// 			};
-	// 		};
-	// 		__u32 priority;
-			char fill_2[20];
-			int skb_iif;  /*   148     4 */
-	// 		__u32 hash;
-	// 		union {
-	// 			u32 vlan_all;
-	// 			struct {
-	// 				__be16 vlan_proto;
-	// 				__u16 vlan_tci;
-	// 			};
-	// 		};
-	// 		union {
-	// 			unsigned int napi_id;
-	// 			unsigned int sender_cpu;
-	// 		};
-	// 		__u32 secmark;
-	// 		union {
-	// 			__u32 mark;
-	// 			__u32 reserved_tailroom;
-	// 		};
-	// 		union {
-	// 			__be16 inner_protocol;
-	// 			__u8 inner_ipproto;
-	// 		};
-	// 		__u16 inner_transport_header;
-	// 		__u16 inner_network_header;
-	// 		__u16 inner_mac_header;
-			char fill_3[28];
-			__be16 protocol;  /*   180     2 */
-			__u16 transport_header;  /*   182     2 */
-			__u16 network_header;  /*   184     2 */
-			__u16 mac_header;  /*   186     2 */
-		};
-		struct {
-	// 		__u8 __pkt_type_offset[0];
-	// 		__u8 pkt_type: 3;
-	// 		__u8 ignore_df: 1;
-	// 		__u8 dst_pending_confirm: 1;
-	// 		__u8 ip_summed: 2;
-	// 		__u8 ooo_okay: 1;
-	// 		__u8 __mono_tc_offset[0];
-	// 		__u8 mono_delivery_time: 1;
-	// 		__u8 tc_at_ingress: 1;
-	// 		__u8 tc_skip_classify: 1;
-	// 		__u8 remcsum_offload: 1;
-	// 		__u8 csum_complete_sw: 1;
-	// 		__u8 csum_level: 2;
-	// 		__u8 inner_protocol_type: 1;
-	// 		__u8 l4_hash: 1;
-	// 		__u8 sw_hash: 1;
-	// 		__u8 wifi_acked_valid: 1;
-	// 		__u8 wifi_acked: 1;
-	// 		__u8 no_fcs: 1;
-	// 		__u8 encapsulation: 1;
-	// 		__u8 encap_hdr_csum: 1;
-	// 		__u8 csum_valid: 1;
-	// 		__u8 ndisc_nodetype: 2;
-	// 		__u8 ipvs_property: 1;
-	// 		__u8 nf_trace: 1;
-	// 		__u8 offload_fwd_mark: 1;
-	// 		__u8 offload_l3_fwd_mark: 1;
-	// 		__u8 redirected: 1;
-	// 		__u8 from_ingress: 1;
-	// 		__u8 nf_skip_egress: 1;
-	// 		__u8 decrypted: 1;
-	// 		__u8 slow_gro: 1;
-	// 		__u8 csum_not_inet: 1;
-	// 		__u16 tc_index;
-	// 		u16 alloc_cpu;
-	// 		union {
-	// 			__wsum csum;
-	// 			struct {
-	// 				__u16 csum_start;
-	// 				__u16 csum_offset;
-	// 			};
-	// 		};
-	// 		__u32 priority;
-			char fill_2[20];
-			int skb_iif;  /*   148     4 */
-	// 		__u32 hash;
-	// 		union {
-	// 			u32 vlan_all;
-	// 			struct {
-	// 				__be16 vlan_proto;
-	// 				__u16 vlan_tci;
-	// 			};
-	// 		};
-	// 		union {
-	// 			unsigned int napi_id;
-	// 			unsigned int sender_cpu;
-	// 		};
-	// 		__u32 secmark;
-	// 		union {
-	// 			__u32 mark;
-	// 			__u32 reserved_tailroom;
-	// 		};
-	// 		union {
-	// 			__be16 inner_protocol;
-	// 			__u8 inner_ipproto;
-	// 		};
-	// 		__u16 inner_transport_header;
-	// 		__u16 inner_network_header;
-	// 		__u16 inner_mac_header;
-			char fill_3[28];
-			__be16 protocol;  /*   180     2 */
-			__u16 transport_header;  /*   182     2 */
-			__u16 network_header;  /*   184     2 */
-			__u16 mac_header;  /*   186     2 */
-		} headers;
-	};
-	// sk_buff_data_t tail; /*   188     4 */
-	// sk_buff_data_t end; /*   192     4 */
-	char fill_4[8];
-	unsigned char *head;  /*   200     8 */
-	// unsigned char *data;
-	// unsigned int truesize;
-	// refcount_t users;
-	// struct skb_ext *extensions;
-};
+struct sk_buff
+{
+    union
+    {
+        struct
+        {
+            struct sk_buff *next;
+            struct sk_buff *prev;
+            union
+            {
+                struct net_device *dev; /*    16     8 */
+            };
+        };
+    };
+    struct sock *sk; /*    24     8 */
+    char fill_0[8];
+    char cb[48]; /*    40    48 */
+    char fill_1[40];
+    union
+    {
+        struct
+        {
+            char fill_2[20];
+            int skb_iif; /*   148     4 */
+            char fill_3[28];
+            __be16 protocol;        /*   180     2 */
+            __u16 transport_header; /*   182     2 */
+            __u16 network_header;   /*   184     2 */
+            __u16 mac_header;       /*   186     2 */
+        };
+        struct
+        {
+            char fill_2[20];
+            int skb_iif; /*   148     4 */
+            char fill_3[28];
+            __be16 protocol;        /*   180     2 */
+            __u16 transport_header; /*   182     2 */
+            __u16 network_header;   /*   184     2 */
+            __u16 mac_header;       /*   186     2 */
+        } headers;
+    };
+    char fill_4[12];
+    unsigned char *head; /*   200     8 */
+    char fill_5[24];
+} __attribute__((__packed__));
 
-struct sk_buff_head {
-	// union {
-	// 	struct {
-	// 		struct sk_buff *next;
-	// 		struct sk_buff *prev;
-	// 	};
-	// 	struct sk_buff_list list;
-	// };
-	char fill_1[16];
-	__u32 qlen;  /*    16     4 */
-	// spinlock_t lock;
-};
+struct sk_buff_head
+{
+    char fill_1[16];
+    __u32 qlen; /*    16     4 */
+    char fill_2[4];
+} __attribute__((__packed__));
 
 struct sock;
 
-struct socket {
-	// socket_state state;
-	// short int type;
-	// long unsigned int flags;
-	// struct file *file;
-	char fill_1[24];
-	struct sock *sk;  /*    24     8 */
-	// const struct proto_ops *ops;
-	// long: 64;
-	// long: 64;
-	// long: 64;
-	// struct socket_wq wq;
-};
+struct socket
+{
+    char fill_1[24];
+    struct sock *sk; /*    24     8 */
+    char fill_2[96];
+} __attribute__((__packed__));
 
 struct sock_common;
 
-struct sock {
-	struct sock_common __sk_common;  /*     0   136 */
-	// struct dst_entry *sk_rx_dst;
-	// int sk_rx_dst_ifindex;
-	// u32 sk_rx_dst_cookie;
-	// socket_lock_t sk_lock;
-	// atomic_t sk_drops;
-	// int sk_rcvlowat;
-	// struct sk_buff_head sk_error_queue;
-	char fill_1[80];
-	struct sk_buff_head sk_receive_queue;  /*   216    24 */
-	// struct {
-	// 	atomic_t rmem_alloc;
-	// 	int len;
-	// 	struct sk_buff *head;
-	// 	struct sk_buff *tail;
-	// } sk_backlog;
-	// int sk_forward_alloc;
-	// u32 sk_reserved_mem;
-	// unsigned int sk_ll_usec;
-	// unsigned int sk_napi_id;
-	// int sk_rcvbuf;
-	// int sk_disconnects;
-	// struct sk_filter *sk_filter;
-	// union {
-	// 	struct socket_wq *sk_wq;
-	// 	struct socket_wq *sk_wq_raw;
-	// };
-	// struct xfrm_policy *sk_policy[2];
-	// struct dst_entry *sk_dst_cache;
-	// atomic_t sk_omem_alloc;
-	// int sk_sndbuf;
-	// int sk_wmem_queued;
-	// refcount_t sk_wmem_alloc;
-	// long unsigned int sk_tsq_flags;
-	// union {
-	// 	struct sk_buff *sk_send_head;
-	// 	struct rb_root tcp_rtx_queue;
-	// };
-	char fill_2[120];
-	struct sk_buff_head sk_write_queue;  /*   360    24 */
-	// __s32 sk_peek_off;
-	// int sk_write_pending;
-	// __u32 sk_dst_pending_confirm;
-	// u32 sk_pacing_status;
-	// long int sk_sndtimeo;
-	// struct timer_list sk_timer;
-	// __u32 sk_priority;
-	// __u32 sk_mark;
-	// long unsigned int sk_pacing_rate;
-	// long unsigned int sk_max_pacing_rate;
-	// struct page_frag sk_frag;
-	// netdev_features_t sk_route_caps;
-	// int sk_gso_type;
-	// unsigned int sk_gso_max_size;
-	// gfp_t sk_allocation;
-	// __u32 sk_txhash;
-	char fill_3[128];
-	unsigned int		__sk_flags_offset[0];  /*   512    0 */
-	// u8 sk_gso_disabled: 1;
-	// u8 sk_kern_sock: 1;
-	// u8 sk_no_check_tx: 1;
-	// u8 sk_no_check_rx: 1;
-	// u8 sk_userlocks: 4;
-	// u8 sk_pacing_shift;
-	// u16 sk_type;
-	// u16 sk_protocol;
-	// u16 sk_gso_max_segs;
-	// long unsigned int sk_lingertime;
-	// struct proto *sk_prot_creator;
-	// rwlock_t sk_callback_lock;
-	// int sk_err;
-	// int sk_err_soft;
-	// u32 sk_ack_backlog;
-	// u32 sk_max_ack_backlog;
-	// kuid_t sk_uid;
-	// u8 sk_txrehash;
-	// u8 sk_prefer_busy_poll;
-	// u16 sk_busy_poll_budget;
-	// spinlock_t sk_peer_lock;
-	// int sk_bind_phc;
-	// struct pid *sk_peer_pid;
-	// const struct cred *sk_peer_cred;
-	// long int sk_rcvtimeo;
-	// ktime_t sk_stamp;
-	// atomic_t sk_tskey;
-	// atomic_t sk_zckey;
-	// u32 sk_tsflags;
-	// u8 sk_shutdown;
-	// u8 sk_clockid;
-	// u8 sk_txtime_deadline_mode: 1;
-	// u8 sk_txtime_report_errors: 1;
-	// u8 sk_txtime_unused: 6;
-	// bool sk_use_task_frag;
-	// struct socket *sk_socket;
-	// void *sk_user_data;
-	// void *sk_security;
-	// struct sock_cgroup_data sk_cgrp_data;
-	// struct mem_cgroup *sk_memcg;
-	// void (*sk_state_change)(struct sock *);
-	// void (*sk_data_ready)(struct sock *);
-	// void (*sk_write_space)(struct sock *);
-	// void (*sk_error_report)(struct sock *);
-	// int (*sk_backlog_rcv)(struct sock *, struct sk_buff *);
-	// struct sk_buff * (*sk_validate_xmit_skb)(struct sock *, struct net_device *, struct sk_buff *);
-	// void (*sk_destruct)(struct sock *);
-	// struct sock_reuseport *sk_reuseport_cb;
-	// struct bpf_local_storage *sk_bpf_storage;
-	// struct callback_head sk_rcu;
-	// netns_tracker ns_tracker;
-};
+struct sock
+{
+    struct sock_common __sk_common; /*     0   136 */
+    char fill_1[80];
+    struct sk_buff_head sk_receive_queue; /*   216    24 */
+    char fill_2[120];
+    struct sk_buff_head sk_write_queue; /*   360    24 */
+    char fill_3[128];
+    unsigned int __sk_flags_offset[0]; /*   512    0 */
+    char fill_4[248];
+} __attribute__((__packed__));
 
 /* BPF kfuncs */
 #ifndef BPF_NO_KFUNC_PROTOTYPES
