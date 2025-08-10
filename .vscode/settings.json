@@ -3,6 +3,10 @@
         "vmlinux_arm64.h": "c",
         "random": "cpp",
         "functional": "c",
-        "kprobe_trace.h": "c"
+        "kprobe_trace.h": "c",
+        "typeinfo": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
     }
 }
