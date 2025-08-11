@@ -1,7 +1,7 @@
 
 
 make 3rdparty/clean
-make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- CC=arm-linux-gnueabihf-gcc 3rdparty/compile
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- CC=arm-linux-gnueabi-gcc 3rdparty/compile
 
 
 
@@ -66,7 +66,7 @@ make check_feat=0 EXTRA_LDFLAGS="-L../../../3rdparty/install/x86/lib --static"
 
 make check_feat=0 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc EXTRA_LDFLAGS="-L../../../3rdparty/install/arm64/lib --static"
 
-make check_feat=0 CROSS_COMPILE=arm-linux-gnueabihf- CC=arm-linux-gnueabihf-gcc EXTRA_LDFLAGS="-L../../../3rdparty/install/arm/lib --static"
+make check_feat=0 CROSS_COMPILE=arm-linux-gnueabi- CC=arm-linux-gnueabi-gcc EXTRA_LDFLAGS="-L../../../3rdparty/install/arm/lib --static"
 
 # display bpf_printk message
 sudo bpftool prog tracelog
