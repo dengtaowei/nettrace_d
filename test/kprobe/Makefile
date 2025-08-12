@@ -1,3 +1,4 @@
+CC ?= $(CROSS_COMPILE)gcc
 TARGET = hello
 ARCH ?= $(shell uname -m | sed 's/x86_64/x86/' \
 			 | sed 's/arm.*/arm/' \
@@ -6,6 +7,8 @@ ARCH ?= $(shell uname -m | sed 's/x86_64/x86/' \
 			 | sed 's/mips.*/mips/' \
 			 | sed 's/riscv64/riscv/' \
 			 | sed 's/loongarch64/loongarch/')
+
+BPF_FLAGS = -I../../src/progs/kheaders/$(ARCH)/ -DBPF_NO_PRESERVE_ACCESS_INDEX
 
 BPF_OBJ = ${TARGET:=.bpf.o}
 
@@ -18,11 +21,12 @@ app: $(TARGET) $(BPF_OBJ)
 .PHONY: app
 
 $(TARGET): $(USER_C) $(USER_SKEL) $(COMMON_H)
-	gcc -Wall -O0 -g3 -o $(TARGET) $(USER_C) -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
+	$(CC) -Wall -O0 -g3 -o $(TARGET) $(USER_C) -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
 
 %.bpf.o: %.bpf.c vmlinux.h $(COMMON_H)
 	clang \
 	    -target bpf \
+		$(BPF_FLAGS) \
 	    -D __BPF_TRACING__ \
         -D __TARGET_ARCH_$(ARCH) \
 	    -Wall \

@@ -1,5 +1,4 @@
-// #include "vmlinux.h"
-#include "/home/anlan/Desktop/nettrace_d/src/progs/kheaders/x86/kheaders_x86.h"
+#include "vmlinux.h"
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
@@ -50,7 +49,8 @@ static inline bool skb_l2_check(u16 header)
 SEC("kprobe/dev_hard_start_xmit")
 int __trace_dev_hard_start_xmit(struct pt_regs *ctx)
 {
-   struct sk_buff *skb = (struct sk_buff *)(((struct pt_regs*)ctx)->di);
+//    struct sk_buff *skb = (struct sk_buff *)(((struct pt_regs*)ctx)->di);
+	struct sk_buff *skb = PT_REGS_PARM1(ctx);
    struct data_t data = {
        .command = "xmit"};
 
