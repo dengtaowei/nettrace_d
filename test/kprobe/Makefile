@@ -1,5 +1,5 @@
 CC ?= $(CROSS_COMPILE)gcc
-TARGET = hello
+TARGET = kprobe
 ARCH ?= $(shell uname -m | sed 's/x86_64/x86/' \
 			 | sed 's/arm.*/arm/' \
 			 | sed 's/aarch64/arm64/' \
@@ -21,17 +21,27 @@ app: $(TARGET) $(BPF_OBJ)
 .PHONY: app
 
 $(TARGET): $(USER_C) $(USER_SKEL) $(COMMON_H)
-	$(CC) -Wall -O0 -g3 -o $(TARGET) $(USER_C) -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
+	$(CC) -Wall -O0 -g3 -DBPF_DEBUG -DNO_BTF -o $(TARGET) $(USER_C) -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
 
 %.bpf.o: %.bpf.c vmlinux.h $(COMMON_H)
-	clang \
-	    -target bpf \
-		$(BPF_FLAGS) \
-	    -D __BPF_TRACING__ \
-        -D __TARGET_ARCH_$(ARCH) \
-	    -Wall \
-	    -O2 -g -o $@ -c $<
-	llvm-strip -g $@
+# 	clang \
+# 	    -target bpf \
+# 		$(BPF_FLAGS) \
+# 	    -D __BPF_TRACING__ \
+#         -D __TARGET_ARCH_$(ARCH) \
+# 	    -Wall \
+# 	    -O2 -g -o $@ -c $<
+# 	llvm-strip -g $@
+	clang -target bpf -O2 -S -Wall -fno-asynchronous-unwind-tables              \
+		-Wno-incompatible-pointer-types-discards-qualifiers             \
+		$< -emit-llvm -Wno-unknown-attributes -I./ -I../../3rdparty/install/$(ARCH)/include  -g \
+		-DBPF_DEBUG \
+		-DNO_BTF \
+		-DBPF_MAKE_HEADERS -DNO_BTF -DBPF_DEBUG -D__F_STACK_TRACE -D__F_NFT_NAME_ARRAY -D__KERN_VER=6.8.0 -D__KERN_MAJOR=6 -Wno-unused-function -Wno-compare-distinct-pointer-types -Wuninitialized -D__TARGET_ARCH_$(ARCH) -DBPF_NO_PRESERVE_ACCESS_INDEX -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/11/include  -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign -Wno-compare-distinct-pointer-types -Wno-gnu-variable-sized-type-not-at-end -Wno-address-of-packed-member -Wno-tautological-compare -Wno-unknown-warning-option -Wno-frame-address -D__F_SK_PRPTOCOL_LEGACY -Xclang        \
+		-disable-llvm-passes -o - |                                     \
+		opt -O2 -mtriple=bpf-pc-linux |                                 \
+		llvm-dis |                                                      \
+		llc -march=bpf -filetype=obj -o $@
 
 $(USER_SKEL): $(BPF_OBJ)
 	bpftool gen skeleton $< > $@
