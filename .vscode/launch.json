@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             // "program": "${workspaceFolder}/output/x86/usr/bin/nettrace",
-            "program": "${workspaceFolder}/test/kprobe/kprobe",
+            "program": "${workspaceFolder}/test/kprobearm/kprobe",
             "args": ["-p", "icmp", "--debug", "--bpf-debug"],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",

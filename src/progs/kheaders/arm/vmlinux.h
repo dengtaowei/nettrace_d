@@ -28222,6 +28222,7 @@ struct sock {
 	unsigned int sk_gso_max_size;
 	gfp_t sk_allocation;
 	u32 sk_txhash;
+	unsigned int		__sk_flags_offset[0];
 	u8 sk_pacing_shift;
 	bool sk_use_task_frag;
 	__u8 __cacheline_group_end__sock_read_tx[0];
