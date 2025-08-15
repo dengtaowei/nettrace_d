@@ -1,5 +1,5 @@
 CC ?= $(CROSS_COMPILE)gcc
-TARGET = kprobe
+TARGET = hello
 ARCH ?= $(shell uname -m | sed 's/x86_64/x86/' \
 			 | sed 's/arm.*/arm/' \
 			 | sed 's/aarch64/arm64/' \

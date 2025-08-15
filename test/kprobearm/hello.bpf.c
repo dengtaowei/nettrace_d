@@ -1,79 +1,61 @@
-// #include "vmlinux.h"
 #include "/home/anlan/Desktop/nettrace_d/nettrace_d/src/progs/kheaders/arm/vmlinux.h"
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 #include <bpf/bpf_endian.h>
-#include "kprobe.h"
+#include "hello.h"
 
+#define CONFIG_MAP_SIZE	1024
+#define MAX_ENTRIES 256
 
-enum rule_type {
-	/* equal */
-	RULE_RETURN_EQ = 1,
-	/* not equal */
-	RULE_RETURN_NE,
-	/* less than */
-	RULE_RETURN_LT,
-	/* greater then */
-	RULE_RETURN_GT,
-	/* in range */
-	RULE_RETURN_RANGE,
-	/* always active this rule */
-	RULE_RETURN_ANY,
-};
-
-#define FUNC_STATUS_FREE	(1 << 0)
-#define FUNC_STATUS_SK		(1 << 1)
-#define FUNC_STATUS_MATCHER	(1 << 3)
-#define FUNC_STATUS_STACK	(1 << 4)
-#define FUNC_STATUS_RET		(1 << 5)
-#define FUNC_STATUS_CFREE	(1 << 6) /* custom skb free function */
-
-
-#define TRACE_MODE_BASIC_MASK		(1 << TRACE_MODE_BASIC)
-#define TRACE_MODE_TIMELINE_MASK	(1 << TRACE_MODE_TIMELINE)
-#define TRACE_MODE_DIAG_MASK		(1 << TRACE_MODE_DIAG)
-#define TRACE_MODE_DROP_MASK		(1 << TRACE_MODE_DROP)
-#define TRACE_MODE_SOCK_MASK		(1 << TRACE_MODE_SOCK)
-#define TRACE_MODE_MONITOR_MASK		(1 << TRACE_MODE_MONITOR)
-#define TRACE_MODE_RTT_MASK		(1 << TRACE_MODE_RTT)
-#define TRACE_MODE_LATENCY_MASK		(1 << TRACE_MODE_LATENCY)
-#define TRACE_MODE_TINY_MASK		(1 << TRACE_MODE_TINY)
-
-#define _L(dst, src) bpf_probe_read_kernel(dst, sizeof(*src), src)
-#define _(src)							\
-({								\
-	typeof(src) ____tmp;					\
-	_L(&____tmp, &src);					\
-	____tmp;						\
-})
-
-#undef _C
-#ifdef NO_BTF
-#define _C(src, f, ...)		BPF_PROBE_READ(src, f, ##__VA_ARGS__)
-#define _LC(dst, src, f, ...)	BPF_PROBE_READ_INTO(dst, src, f, ##__VA_ARGS__)
+#ifdef INLINE_MODE
+#undef inline
+#define inline inline __attribute__((always_inline))
+#define auto_inline inline
 #else
-#define _C(src, f, ...)		BPF_CORE_READ(src, f, ##__VA_ARGS__)
-#define _LC(dst, src, f, ...)	BPF_CORE_READ_INTO(dst, src, f, ##__VA_ARGS__)
+#define auto_inline
 #endif
 
-#ifndef IPPROTO_ICMPV6
-#define IPPROTO_ICMPV6		58	/* ICMPv6			*/
-#endif
+// clang -E -target bpf -D__BPF_TRACING__ -D__TARGET_ARCH_x86 -Wall -g hello.bpf.c -o hello.i
 
-struct {
-	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-	__uint(key_size, sizeof(int));
-	__uint(value_size, sizeof(u32));
-	__uint(max_entries, MAX_ENTRIES);
-} m_event SEC(".maps");
+const char kprobe_sys_msg[16] = "sys_execve";
+const char kprobe_msg[16] = "do_execve";
+const char fentry_msg[16] = "fentry_execve";
+const char tp_msg[16] = "tp_execve";
+const char tp_btf_exec_msg[16] = "tp_btf_exec";
+const char raw_tp_exec_msg[16] = "raw_tp_exec";
+struct
+{
+   __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+   __uint(key_size, sizeof(u32));
+   __uint(value_size, sizeof(u32));
+} output SEC(".maps");
+
+struct
+{
+   __uint(type, BPF_MAP_TYPE_HASH);
+   __uint(max_entries, 10240);
+   __type(key, u32);
+   __type(value, struct msg_t);
+} my_config SEC(".maps");
 
 struct {
 	__uint(type, BPF_MAP_TYPE_ARRAY);
 	__uint(key_size, sizeof(int));
-	__uint(value_size, CONFIG_MAP_SIZE);
-	__uint(max_entries, 1);
-} m_config SEC(".maps");
+	__uint(value_size, sizeof(__u64));
+	__uint(max_entries, 512);
+} m_stats SEC(".maps");
+
+struct {
+#ifdef BPF_MAP_TYPE_LRU_HASH
+	__uint(type, BPF_MAP_TYPE_LRU_HASH);
+#else
+	__uint(type, BPF_MAP_TYPE_HASH);
+#endif
+	__uint(key_size, sizeof(u64));
+	__uint(value_size, sizeof(int));
+	__uint(max_entries, 1024);
+} m_ret SEC(".maps");
 
 typedef struct {
 	u16 func1;
@@ -94,22 +76,11 @@ struct {
 } m_matched SEC(".maps");
 
 struct {
-	__uint(type, BPF_MAP_TYPE_ARRAY);
+	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
 	__uint(key_size, sizeof(int));
-	__uint(value_size, sizeof(__u64));
-	__uint(max_entries, 512);
-} m_stats SEC(".maps");
-
-struct {
-#ifdef BPF_MAP_TYPE_LRU_HASH
-	__uint(type, BPF_MAP_TYPE_LRU_HASH);
-#else
-	__uint(type, BPF_MAP_TYPE_HASH);
-#endif
-	__uint(key_size, sizeof(u64));
-	__uint(value_size, sizeof(int));
-	__uint(max_entries, 1024);
-} m_ret SEC(".maps");
+	__uint(value_size, sizeof(u32));
+	__uint(max_entries, MAX_ENTRIES);
+} m_event SEC(".maps");
 
 
 typedef struct {
@@ -117,6 +88,195 @@ typedef struct {
 	u16 mac_header;
 	u16 network_header;
 } parse_ctx_t;
+
+static inline bool skb_l2_check(u16 header)
+{
+	return !header || header == (u16)~0U;
+}
+
+#define AF_INET		2	/* Internet IP Protocol 	*/
+#define AF_INET6	10	/* IP version 6			*/
+#define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
+#define ETH_P_IPV6	0x86DD		/* IPv6 over bluebook		*/
+#define ETH_P_ARP	0x0806		/* Address Resolution packet	*/
+
+#define TRACE_MAX 160
+
+typedef struct {
+	u32	saddr;
+	u32	daddr;
+	u32	addr;
+	u32	pkt_len_1;
+	u32	pkt_len_2;
+	u32	pad0;
+	u32	saddr_v6[4];
+	u32	daddr_v6[4];
+	u32	addr_v6[4];
+	u16	sport;
+	u16	dport;
+	u16	port;
+	u16	l3_proto;
+	u8	l4_proto;
+	u8	tcp_flags;
+	u8	saddr_v6_enable:1,
+		daddr_v6_enable:1,
+		addr_v6_enable:1;
+
+#ifdef BPF_DEBUG
+	bool	bpf_debug;
+#endif
+} pkt_args_t;
+
+typedef struct {
+	pkt_args_t pkt;
+	u32  trace_mode;
+	u32  pid;
+	u32  netns;
+	u32  max_event;
+	bool drop_reason;
+	bool detail;
+	bool hooks;
+	bool ready;
+	bool stack;
+	bool tiny_output;
+	bool has_filter;
+	bool latency_summary;
+	bool func_stats;
+	bool match_mode;
+	bool latency_free;
+	u32  first_rtt;
+	u32  last_rtt;
+	u32  rate_limit;
+	u32  latency_min;
+	int  __rate_limit;
+	u64  __last_update;
+	u8   trace_status[TRACE_MAX];
+	u64  event_count;
+} bpf_args_t;
+
+#define be16 u16
+#define be32 u32
+
+#define ETH_ALEN	6
+
+
+typedef struct {
+	u16	sport;
+	u16	dport;
+} l4_min_t;
+
+typedef struct {
+	u64	ts;
+	union {
+		struct {
+			u32	saddr;
+			u32	daddr;
+		} ipv4;
+#ifndef NT_DISABLE_IPV6
+		struct {
+			u8	saddr[16];
+			u8	daddr[16];
+		} ipv6;
+#endif
+	} l3;
+	union {
+		struct {
+			be16	sport;
+			be16	dport;
+			u32	seq;
+			u32	ack;
+			u8	flags;
+		} tcp;
+		struct {
+			be16	sport;
+			be16	dport;
+		} udp;
+		l4_min_t min;
+		struct {
+			u8	type;
+			u8	code;
+			u16	seq;
+			u16	id;
+		} icmp;
+		struct {
+			u16	op;
+			u8	source[ETH_ALEN];
+			u8	dest[ETH_ALEN];
+		} arp_ext;
+		struct
+		{
+			u32 spi;
+			u32 seq;
+		} espheader;
+#define field_udp l4.udp
+	} l4;
+	u16 proto_l3;
+	u8 proto_l4;
+	u8 pad;
+} packet_t;
+
+typedef struct {
+	u64	ts;
+	union {
+		struct {
+			u32	saddr;
+			u32	daddr;
+		} ipv4;
+#if 0
+		struct {
+			u8	saddr[16];
+			u8	daddr[16];
+		} ipv6;
+#endif
+	} l3;
+	union {
+		struct {
+			be16	sport;
+			be16	dport;
+			u32	packets_out;
+			u32	retrans_out;
+			u32	snd_una;
+		} tcp;
+		struct {
+			be16	sport;
+			be16	dport;
+		} udp;
+		l4_min_t min;
+	} l4;
+	u32 timer_out;
+	u32 wqlen;
+	u32 rqlen;
+	u16 proto_l3;
+	u8 proto_l4;
+	u8 timer_pending;
+	u8 state;
+	u8 ca_state;
+} sock_t;
+
+
+typedef struct {
+	u16		meta;
+	u16		func;
+	u32		key;
+	union {
+		packet_t	pkt;
+		sock_t		ske;
+	};
+	union {
+		/* For FEXIT program only for now */
+		u64	retval;
+		struct {
+			u16 latency_func1;
+			u16 latency_func2;
+			u32 latency;
+		};
+	};
+#ifdef __F_STACK_TRACE
+	u32		stack_id;
+#endif
+	u32		pid;
+	int		__event_filed[0];
+} event_t;
 
 typedef struct {
 	/* the bpf context args */
@@ -140,88 +300,6 @@ typedef struct {
 } context_info_t;
 
 
-static inline bool skb_l2_check(u16 header)
-{
-	return !header || header == (u16)~0U;
-}
-
-#define AF_INET		2	/* Internet IP Protocol 	*/
-#define AF_INET6	10	/* IP version 6			*/
-#define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
-#define ETH_P_IPV6	0x86DD		/* IPv6 over bluebook		*/
-#define ETH_P_ARP	0x0806		/* Address Resolution packet	*/
-
-/* used to do basic filter */
-#define filter_enabled(args, attr)					\
-	(args && args->attr)
-#define filter_check(args, attr, value)					\
-	(filter_enabled(args, attr) && args->attr != value)
-#define filter_any_enabled(args, attr)					\
-	(args && (args->attr || args->s##attr ||	\
-		       args->d##attr))
-
-static inline bool func_is_free(u8 status)
-{
-	return status & (FUNC_STATUS_FREE | FUNC_STATUS_CFREE);
-}
-
-static inline bool func_is_cfree(u8 status)
-{
-	return status & FUNC_STATUS_CFREE;
-}
-
-static inline void free_map_ctx(bpf_args_t *args, void *key)
-{
-	bpf_map_delete_elem(&m_matched, key);
-}
-
-static __always_inline void update_stats_key(u32 key)
-{
-	u64 *stats = bpf_map_lookup_elem(&m_stats, &key);
-
-	if (stats)
-		(*stats)++;
-}
-
-static inline void consume_map_ctx(bpf_args_t *args, void *key)
-{
-	bpf_map_delete_elem(&m_matched, key);
-	args->event_count++;
-}
-
-static inline void init_ctx_match(void *skb, u16 func, bool ts)
-{
-	match_val_t matched = {
-		// .ts1 = ts ? bpf_ktime_get_ns() / 1000 : 0,
-		.func1 = func,
-	};
-
-	bpf_map_update_elem(&m_matched, &skb, &matched, 0);
-}
-
-static __always_inline u8 get_func_status(bpf_args_t *args, u16 func)
-{
-	if (func >= TRACE_MAX)
-		return 0;
-
-	return args->trace_status[func];
-}
-
-trace_context_t trace_ctx = {
-	.mode = TRACE_MODE_TIMELINE,
-};
-
-#define TRACE_MODE_BPF_CTX_MASK		\
-	(TRACE_MODE_DIAG_MASK | TRACE_MODE_TIMELINE_MASK |	\
-	 TRACE_MODE_LATENCY_MASK)
-#define TRACE_MODE_CTX_MASK		\
-	(TRACE_MODE_DIAG_MASK | TRACE_MODE_TIMELINE_MASK)
-
-static inline bool mode_has_context(bpf_args_t *args)
-{
-	return args->trace_mode & TRACE_MODE_BPF_CTX_MASK;
-}
-
 static __always_inline int check_rate_limit(bpf_args_t *args)
 {
 	u64 last_ts = args->__last_update, ts = 0;
@@ -238,7 +316,7 @@ static __always_inline int check_rate_limit(bpf_args_t *args)
 
 	if (budget <= 0) {
 		ts = bpf_ktime_get_ns();
-		// budget = (((ts - last_ts) / 1000000) * limit) / 1000;
+		// budget = (((ts - last_ts) / 1000000) * limit) / 1000;  // 不知道为什么，有这一行arm32加载失败
 		budget = budget < limit ? budget : limit;
 		if (budget <= 0)
 			return -1;
@@ -251,73 +329,77 @@ static __always_inline int check_rate_limit(bpf_args_t *args)
 	return 0;
 }
 
-static __always_inline void update_stats_log(u32 val)
+
+
+static __always_inline u8 get_func_status(bpf_args_t *args, u16 func)
 {
-	u32 key = 0, i = 0, tmp = 2;
+	if (func >= TRACE_MAX)
+		return 0;
 
-	#pragma clang loop unroll_count(16)
-	for (; i < 16; i++) {
-		if (val < tmp)
-			break;
-		tmp <<= 1;
-		key++;
-	}
-
-	update_stats_key(key);
+	return args->trace_status[func];
 }
 
-static inline int pre_handle_latency(context_info_t *info,
-				     match_val_t *match_val)
+typedef enum trace_mode {
+	TRACE_MODE_BASIC,
+	TRACE_MODE_DROP,
+	TRACE_MODE_TIMELINE,
+	TRACE_MODE_DIAG,
+	TRACE_MODE_SOCK,
+	TRACE_MODE_MONITOR,
+	TRACE_MODE_RTT,
+	TRACE_MODE_LATENCY,
+	/* following is some fake mode */
+	TRACE_MODE_TINY = 16,
+} trace_mode_t;
+
+#define TRACE_MODE_BASIC_MASK		(1 << TRACE_MODE_BASIC)
+#define TRACE_MODE_TIMELINE_MASK	(1 << TRACE_MODE_TIMELINE)
+#define TRACE_MODE_DIAG_MASK		(1 << TRACE_MODE_DIAG)
+#define TRACE_MODE_DROP_MASK		(1 << TRACE_MODE_DROP)
+#define TRACE_MODE_SOCK_MASK		(1 << TRACE_MODE_SOCK)
+#define TRACE_MODE_MONITOR_MASK		(1 << TRACE_MODE_MONITOR)
+#define TRACE_MODE_RTT_MASK		(1 << TRACE_MODE_RTT)
+#define TRACE_MODE_LATENCY_MASK		(1 << TRACE_MODE_LATENCY)
+#define TRACE_MODE_TINY_MASK		(1 << TRACE_MODE_TINY)
+
+#define TRACE_MODE_BPF_CTX_MASK		\
+	(TRACE_MODE_DIAG_MASK | TRACE_MODE_TIMELINE_MASK |	\
+	 TRACE_MODE_LATENCY_MASK)
+#define TRACE_MODE_CTX_MASK		\
+	(TRACE_MODE_DIAG_MASK | TRACE_MODE_TIMELINE_MASK)
+
+static inline bool mode_has_context(bpf_args_t *args)
 {
-	bpf_args_t *args = (void *)info->args;
-	u32 delta;
-
-	if (match_val) {
-		if (args->latency_free || !func_is_free(info->func_status) ||
-		    func_is_cfree(info->func_status)) {
-			// match_val->ts2 = bpf_ktime_get_ns() / 1000;
-			match_val->func2 = info->func;
-		}
-
-		/* reentry the matcher, or the free of skb is not traced. */
-		if (info->func_status & FUNC_STATUS_MATCHER &&
-		    match_val->func1 == info->func)
-			// match_val->ts1 = bpf_ktime_get_ns() / 1000;
-
-		if (func_is_free(info->func_status)) {
-			delta = match_val->ts2 - match_val->ts1;
-			/* skip a single match function */
-			if (!match_val->func2 || delta < args->latency_min) {
-				free_map_ctx(info->args, &info->skb);
-				return 1;
-			}
-			if (args->latency_summary) {
-				update_stats_log(delta);
-				consume_map_ctx(info->args, &info->skb);
-				return 1;
-			}
-			info->match_val = *match_val;
-			return 0;
-		}
-		return 1;
-	} else {
-		/* skip single free function for latency total mode */
-		if (func_is_free(info->func_status))
-			return 1;
-		/* if there isn't any filter, skip handle_entry() */
-		if (!args->has_filter) {
-			init_ctx_match(info->skb, info->func, true);
-			return 1;
-		}
-	}
-	info->no_event = true;
-	return 0;
+	return args->trace_mode & TRACE_MODE_BPF_CTX_MASK;
 }
 
-static inline bool trace_mode_latency(bpf_args_t *args)
+static __always_inline void update_stats_key(u32 key)
 {
-	return args->trace_mode & TRACE_MODE_LATENCY_MASK;
+	u64 *stats = bpf_map_lookup_elem(&m_stats, &key);
+
+	if (stats)
+		(*stats)++;
 }
+
+#define FUNC_STATUS_FREE	(1 << 0)
+#define FUNC_STATUS_SK		(1 << 1)
+#define FUNC_STATUS_MATCHER	(1 << 3)
+#define FUNC_STATUS_STACK	(1 << 4)
+#define FUNC_STATUS_RET		(1 << 5)
+#define FUNC_STATUS_CFREE	(1 << 6) /* custom skb free function */
+
+
+static inline bool func_is_free(u8 status)
+{
+	return status & (FUNC_STATUS_FREE | FUNC_STATUS_CFREE);
+}
+
+static inline void consume_map_ctx(bpf_args_t *args, void *key)
+{
+	bpf_map_delete_elem(&m_matched, key);
+	args->event_count++;
+}
+
 
 typedef struct {
 	u16 meta;
@@ -325,6 +407,12 @@ typedef struct {
 	u32 key;
 	u64 ts;
 } tiny_event_t;
+
+#define EVENT_OUTPUT_PTR(ctx, data, size)			\
+	bpf_perf_event_output(ctx, &m_event, BPF_F_CURRENT_CPU,	\
+			      data, size)
+#define EVENT_OUTPUT(ctx, data)					\
+	EVENT_OUTPUT_PTR(ctx, &data, sizeof(data))
 
 enum {
 	FUNC_TYPE_FUNC,
@@ -334,11 +422,13 @@ enum {
 	FUNC_TYPE_MAX,
 };
 
-#define EVENT_OUTPUT_PTR(ctx, data, size)			\
-	bpf_perf_event_output(ctx, &m_event, BPF_F_CURRENT_CPU,	\
-			      data, size)
-#define EVENT_OUTPUT(ctx, data)					\
-	EVENT_OUTPUT_PTR(ctx, &data, sizeof(data))
+#define _L(dst, src) bpf_probe_read_kernel(dst, sizeof(*src), src)
+#define _(src)							\
+({								\
+	typeof(src) ____tmp;					\
+	_L(&____tmp, &src);					\
+	____tmp;						\
+})
 
 static inline void handle_tiny_output(context_info_t *info)
 {
@@ -382,19 +472,102 @@ static inline void get_ret(context_info_t *info)
 
 static inline int pre_tiny_output(context_info_t *info)
 {
-	// handle_tiny_output(info);
-	// if (func_is_free(info->func_status))
-	// 	consume_map_ctx(info->args, &info->skb);
-	// else
-	// 	get_ret(info);
+	handle_tiny_output(info);
+	if (func_is_free(info->func_status))
+		consume_map_ctx(info->args, &info->skb);
+	else
+		get_ret(info);
 	return 1;
 }
 
-/* return value:
- *   -1: invalid and return
- *    0: valid and continue
- *    1: valid and return
- */
+static inline bool trace_mode_latency(bpf_args_t *args)
+{
+	return args->trace_mode & TRACE_MODE_LATENCY_MASK;
+}
+
+static inline bool func_is_cfree(u8 status)
+{
+	return status & FUNC_STATUS_CFREE;
+}
+
+static inline void free_map_ctx(bpf_args_t *args, void *key)
+{
+	bpf_map_delete_elem(&m_matched, key);
+}
+
+static __always_inline void update_stats_log(u32 val)
+{
+	u32 key = 0, i = 0, tmp = 2;
+
+	#pragma clang loop unroll_count(16)
+	for (; i < 16; i++) {
+		if (val < tmp)
+			break;
+		tmp <<= 1;
+		key++;
+	}
+
+	update_stats_key(key);
+}
+
+static inline void init_ctx_match(void *skb, u16 func, bool ts)
+{
+	// match_val_t matched = {
+	// 	.ts1 = ts ? bpf_ktime_get_ns() / 1000 : 0,
+	// 	.func1 = func,
+	// };
+
+	// bpf_map_update_elem(&m_matched, &skb, &matched, 0);
+}
+
+static inline int pre_handle_latency(context_info_t *info,
+				     match_val_t *match_val)
+{
+	bpf_args_t *args = (void *)info->args;
+	u32 delta;
+
+	if (match_val) {
+		if (args->latency_free || !func_is_free(info->func_status) ||
+		    func_is_cfree(info->func_status)) {
+			// match_val->ts2 = bpf_ktime_get_ns() / 1000;  // dtwdebug
+			match_val->func2 = info->func;
+		}
+
+		/* reentry the matcher, or the free of skb is not traced. */
+		if (info->func_status & FUNC_STATUS_MATCHER &&
+		    match_val->func1 == info->func)
+			// match_val->ts1 = bpf_ktime_get_ns() / 1000;  // dtwdebug
+
+		if (func_is_free(info->func_status)) {
+			delta = match_val->ts2 - match_val->ts1;
+			/* skip a single match function */
+			if (!match_val->func2 || delta < args->latency_min) {
+				free_map_ctx(info->args, &info->skb);
+				return 1;
+			}
+			if (args->latency_summary) {
+				update_stats_log(delta);
+				consume_map_ctx(info->args, &info->skb);
+				return 1;
+			}
+			info->match_val = *match_val;
+			return 0;
+		}
+		return 1;
+	} else {
+		/* skip single free function for latency total mode */
+		if (func_is_free(info->func_status))
+			return 1;
+		/* if there isn't any filter, skip handle_entry() */
+		if (!args->has_filter) {
+			init_ctx_match(info->skb, info->func, true);
+			return 1;
+		}
+	}
+	info->no_event = true;
+	return 0;
+}
+
 static inline int pre_handle_entry(context_info_t *info, u16 func)
 {
 	bpf_args_t *args = (void *)info->args;
@@ -453,35 +626,10 @@ static inline int pre_handle_entry(context_info_t *info, u16 func)
 			info->no_event = true;
 		}
 	}
-	// bpf_printk("dtwdebug4 ret=%d\n", ret);
+	bpf_printk("dtwdebug4 ret=%d\n", ret);
 	return ret;
 }
 
-/* err:
- *   -1: not match
- *    0: match
- *    1: match and no output
- */
-static inline void handle_entry_finish(context_info_t *info, int err)
-{
-	if (err < 0)
-		return;
-
-	if (mode_has_context(info->args)) {
-		if (func_is_free(info->func_status)) {
-			if (info->matched)
-				consume_map_ctx(info->args, &info->skb);
-		} else if (!info->matched) {
-			init_ctx_match(info->skb, info->func,
-				       trace_mode_latency(info->args));
-		}
-	} else {
-		info->args->event_count++;
-	}
-
-	if (info->args->func_stats)
-		update_stats_key(info->func);
-}
 
 typedef struct {
 	u16		meta;
@@ -506,13 +654,13 @@ typedef struct {
 	int		__event_filed[0];
 } detail_event_t;
 
-#ifdef INLINE_MODE
-#undef inline
-#define inline inline __attribute__((always_inline))
-#define auto_inline inline
-#else
-#define auto_inline
-#endif
+struct {
+	__uint(type, BPF_MAP_TYPE_ARRAY);
+	__uint(key_size, sizeof(int));
+	__uint(value_size, CONFIG_MAP_SIZE);
+	__uint(max_entries, 1);
+} m_config SEC(".maps");
+
 
 #define CONFIG() ({						\
 	int _key = 0;						\
@@ -536,8 +684,32 @@ typedef struct {
 
 #define args_check(args, attr, value) (args->attr && args->attr != value)
 
-#define ETH_HLEN	14		/* Total octets in header.	 */
 
+#undef _C
+#ifdef NO_BTF
+#define _C(src, f, ...)		BPF_PROBE_READ(src, f, ##__VA_ARGS__)
+#define _LC(dst, src, f, ...)	BPF_PROBE_READ_INTO(dst, src, f, ##__VA_ARGS__)
+#else
+#define _C(src, f, ...)		BPF_CORE_READ(src, f, ##__VA_ARGS__)
+#define _LC(dst, src, f, ...)	BPF_CORE_READ_INTO(dst, src, f, ##__VA_ARGS__)
+#endif
+
+#ifndef __F_DISABLE_SOCK
+
+#if (!defined(NO_BTF) || defined(__F_SK_PRPTOCOL_LEGACY))
+static __always_inline u8 sk_get_protocol(struct sock *sk)
+{
+	u32 flags = _(((u32 *)(&sk->__sk_flags_offset))[0]);
+	u8 l4_proto;
+
+#ifdef CONFIG_CPU_BIG_ENDIAN
+	l4_proto = (flags << 8) >> 24;
+#else
+	l4_proto = (flags << 16) >> 24;
+#endif
+	return l4_proto;
+}
+#endif
 
 static inline int filter_ipv4_check(pkt_args_t *args, u32 saddr,
 					u32 daddr)
@@ -566,6 +738,15 @@ static inline int filter_ipv6_check(pkt_args_t *args, void *saddr, void *daddr)
 	       (args->addr_v6_enable && !is_ipv6_equal(args->addr_v6, daddr) &&
 				 !is_ipv6_equal(args->addr_v6, saddr));
 }
+
+/* used to do basic filter */
+#define filter_enabled(args, attr)					\
+	(args && args->attr)
+#define filter_check(args, attr, value)					\
+	(filter_enabled(args, attr) && args->attr != value)
+#define filter_any_enabled(args, attr)					\
+	(args && (args->attr || args->s##attr ||	\
+		       args->d##attr))
 
 static inline int filter_port(pkt_args_t *args, u32 sport, u32 dport)
 {
@@ -621,21 +802,26 @@ const volatile bool bpf_func_exist[BPF_LOCAL_FUNC_MAX] = {0};
 #define bpf_core_helper_exist(name) false
 #endif
 
-#ifndef __F_DISABLE_SOCK
-
-#if (!defined(NO_BTF) || defined(__F_SK_PRPTOCOL_LEGACY))
-static __always_inline u8 sk_get_protocol(struct sock *sk)
-{
-	u32 flags = _(((u32 *)(&sk->__sk_flags_offset))[0]);
-	u8 l4_proto;
-
-#ifdef CONFIG_CPU_BIG_ENDIAN
-	l4_proto = (flags << 8) >> 24;
+#ifndef BPF_NO_GLOBAL_DATA
+#ifdef __PROG_TYPE_TRACING
+#define bpf_core_helper_exist(name) \
+	bpf_core_enum_value_exists(enum bpf_func_id, BPF_FUNC_##name)
 #else
-	l4_proto = (flags << 16) >> 24;
+#define bpf_core_helper_exist(name) bpf_func_exist[BPF_LOCAL_FUNC_##name]
 #endif
-	return l4_proto;
-}
+#else
+#define bpf_core_helper_exist(name) false
+#endif
+
+#ifndef BPF_NO_GLOBAL_DATA
+#ifdef __PROG_TYPE_TRACING
+#define bpf_core_helper_exist(name) \
+	bpf_core_enum_value_exists(enum bpf_func_id, BPF_FUNC_##name)
+#else
+#define bpf_core_helper_exist(name) bpf_func_exist[BPF_LOCAL_FUNC_##name]
+#endif
+#else
+#define bpf_core_helper_exist(name) false
 #endif
 
 static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
@@ -698,13 +884,13 @@ static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
 		struct tcp_sock *tp = (void *)sk;
 
 		if (bpf_core_type_exists(struct tcp_sock)) {
-			ske->l4.tcp.packets_out = _C(tp, packets_out);
-			ske->l4.tcp.retrans_out = _C(tp, retrans_out);
-			ske->l4.tcp.snd_una = _C(tp, snd_una);
+			// ske->l4.tcp.packets_out = _C(tp, packets_out);  // dtwdebug
+		// 	ske->l4.tcp.retrans_out = _C(tp, retrans_out);
+		// 	ske->l4.tcp.snd_una = _C(tp, snd_una);
 		} else {
-			ske->l4.tcp.packets_out = _(tp->packets_out);
-			ske->l4.tcp.retrans_out = _(tp->retrans_out);
-			ske->l4.tcp.snd_una = _(tp->snd_una);
+		// 	ske->l4.tcp.packets_out = _(tp->packets_out);
+		// 	ske->l4.tcp.retrans_out = _(tp->retrans_out);
+		// 	ske->l4.tcp.snd_una = _(tp->snd_una);
 		}
 	}
 	case IPPROTO_UDP:
@@ -729,21 +915,21 @@ static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
 		return 0;
 
 	icsk = (void *)sk;
-	bpf_probe_read_kernel(&ske->ca_state, sizeof(u8),
-		(u8 *)icsk +
-		bpf_core_field_offset(struct inet_connection_sock,
-			icsk_retransmits) -
-		1);
+	// bpf_probe_read_kernel(&ske->ca_state, sizeof(u8),  // dtwdebug
+	// 	(u8 *)icsk +
+	// 	bpf_core_field_offset(struct inet_connection_sock,
+	// 		icsk_retransmits) -
+	// 	1);
 
-	if (bpf_core_helper_exist(jiffies64)) {
-		if (bpf_core_field_exists(icsk->icsk_timeout))
-			tmo = _C(icsk, icsk_timeout);
-		else
-			tmo = _C(icsk, icsk_retransmit_timer.expires);
-		ske->timer_out = tmo - (unsigned long)bpf_jiffies64();
-	}
+	// if (bpf_core_helper_exist(jiffies64)) {  // dtwdebug
+		// if (bpf_core_field_exists(icsk->icsk_timeout))
+		// 	tmo = _C(icsk, icsk_timeout);
+		// else
+		// 	tmo = _C(icsk, icsk_retransmit_timer.expires);
+		// ske->timer_out = tmo - (unsigned long)bpf_jiffies64();
+	// }
 
-	ske->timer_pending = _C(icsk, icsk_pending);
+	// ske->timer_pending = _C(icsk, icsk_pending);  // dtwdebug
 
 	return 0;
 err:
@@ -754,6 +940,10 @@ static inline bool skb_l4_was_set(u16 transport_header)
 {
 	return transport_header != (typeof(transport_header))~0U;
 }
+
+#ifndef IPPROTO_ICMPV6
+#define IPPROTO_ICMPV6		58	/* ICMPv6			*/
+#endif
 
 static inline int probe_parse_l4(void *l4, packet_t *pkt, pkt_args_t *args)
 {
@@ -800,16 +990,16 @@ static inline int probe_parse_l4(void *l4, packet_t *pkt, pkt_args_t *args)
 			return -1;
 		pkt->l4.icmp.code = _(icmp->code);
 		pkt->l4.icmp.type = _(icmp->type);
-		pkt->l4.icmp.seq = _(icmp->un.echo.sequence);
-		pkt->l4.icmp.id = _(icmp->un.echo.id);
+		// pkt->l4.icmp.seq = _(icmp->un.echo.sequence);  // dtwdebug
+		// pkt->l4.icmp.id = _(icmp->un.echo.id);
 		break;
 	}
 	case IPPROTO_ESP: {
 		struct ip_esp_hdr *esp_hdr = l4;
 		if (filter_any_enabled(args, port))
 			return -1;
-		pkt->l4.espheader.seq = _(esp_hdr->seq_no);
-		pkt->l4.espheader.spi = _(esp_hdr->spi);
+		// pkt->l4.espheader.seq = _(esp_hdr->seq_no);
+		// 	pkt->l4.espheader.spi = _(esp_hdr->spi);
 		break;
 	}
 	default:
@@ -897,12 +1087,12 @@ static inline int probe_parse_skb_sk(struct sock *sk, struct sk_buff *skb,
 		struct tcp_skb_cb *cb;
 
 		cb = skb_cb(skb);
-		pkt->l4.tcp.seq = _C(cb, seq);
-		pkt->l4.tcp.flags = _C(cb, tcp_flags);
-		if (bpf_core_type_exists(struct tcp_sock))
-			pkt->l4.tcp.ack = _C(tp, rcv_nxt);
-		else
-			pkt->l4.tcp.ack = _(tp->rcv_nxt);
+		// pkt->l4.tcp.seq = _C(cb, seq); // dtwdebug
+		// pkt->l4.tcp.flags = _C(cb, tcp_flags);
+		// if (bpf_core_type_exists(struct tcp_sock))
+		// 	pkt->l4.tcp.ack = _C(tp, rcv_nxt);
+		// else
+		// 	pkt->l4.tcp.ack = _(tp->rcv_nxt);
 	}
 	case IPPROTO_UDP:
 		pkt->l4.min.sport = bpf_htons(_C(skc, skc_num));
@@ -929,6 +1119,8 @@ static inline int probe_parse_skb_sk(struct sock *sk, struct sk_buff *skb,
 	return -1;
 }
 #endif
+
+#define ETH_HLEN	14		/* Total octets in header.	 */
 
 static inline bool skb_l4_check(u16 l4, u16 l3)
 {
@@ -1180,7 +1372,7 @@ static int auto_inline handle_entry(context_info_t *info)
 			pr_bpf_debug("no skb available, func=%d", info->func);
 			goto err;
 		}
-		err = probe_parse_skb(skb, info->sk, pkt, pkt_args);
+		// err = probe_parse_skb(skb, info->sk, pkt, pkt_args);  // dtwdebug
 	}
 
 	if (err)
@@ -1203,8 +1395,8 @@ no_filter:
 
 	bpf_get_current_comm(detail->task, sizeof(detail->task));
 	if (dev) {
-		bpf_core_read_str(detail->ifname, sizeof(detail->ifname) - 1,
-				  &dev->name);
+		// bpf_core_read_str(detail->ifname, sizeof(detail->ifname) - 1,  // dtwdebug
+		// 		  &dev->name);
 		detail->ifindex = _C(dev, ifindex);
 	} else {
 		detail->ifindex = _C(skb, skb_iif);
@@ -1283,9 +1475,31 @@ static inline int default_handle_entry(context_info_t *info)
 		do_event_output(info, size);
 #endif
 	}
-
 	return err;
 }
+
+static inline void handle_entry_finish(context_info_t *info, int err)
+{
+	if (err < 0)
+		return;
+
+	if (mode_has_context(info->args)) {
+		if (func_is_free(info->func_status)) {
+			if (info->matched)
+				consume_map_ctx(info->args, &info->skb);
+		} else if (!info->matched) {
+			init_ctx_match(info->skb, info->func,
+				       trace_mode_latency(info->args));
+		}
+	} else {
+		info->args->event_count++;
+	}
+
+	if (info->args->func_stats)
+		update_stats_key(info->func);
+}
+
+#define CONFIG_MAP_SIZE	1024
 
 static inline int fake____netif_receive_skb_core(context_info_t *info);
 
@@ -1315,6 +1529,5 @@ int __trace___netif_receive_skb_core(void *ctx) {
 static inline int fake____netif_receive_skb_core(context_info_t *info) {
 	 return default_handle_entry(info); 
 } 
-
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
