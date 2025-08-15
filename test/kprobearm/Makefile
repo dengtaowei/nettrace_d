@@ -21,7 +21,7 @@ app: $(TARGET) $(BPF_OBJ)
 .PHONY: app
 
 $(TARGET): $(USER_C) $(USER_SKEL) $(COMMON_H)
-	$(CC) -Wall -O0 -g3 -DBPF_DEBUG -DNO_BTF -o $(TARGET) $(USER_C) -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
+	$(CC) -Wall -O0 -g3 -DBPF_DEBUG -DNO_BTF -o $(TARGET) $(USER_C) --static -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
 
 NOSTDINC_FLAGS	+= -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 
