@@ -1,71 +1,70 @@
-[root@kami mnt]# insmod ./skb_offset.ko 
-[ 1717.570498] =============
-[ 1717.570498] struct tcp_sock: 1728
-[ 1717.577128] struct tcp_sock.retrans_out: 1256
-[ 1717.577572] struct tcp_sock.rcv_nxt: 1008
-[ 1717.578245] struct tcp_sock.snd_una: 1052
-[ 1717.578388] struct tcp_sock.packets_out: 1252
-[ 1717.578561] =============
-[ 1717.578561] struct timer_list: 20
-[ 1717.579126] struct timer_list.expires: 8
-[ 1717.579579] =============
-[ 1717.579579] struct inet_connection_sock: 984
-[ 1717.579877] struct inet_connection_sock.icsk_timeout: 740
-[ 1717.580142] struct inet_connection_sock.icsk_retransmit_timer: 744
-[ 1717.580332] struct inet_connection_sock.icsk_retransmits: 825
-[ 1717.580530] struct inet_connection_sock.icsk_pending: 826
-[ 1717.580823] =============
-[ 1717.580823] struct sock_common: 80
-[ 1717.581064] struct sock_common.skc_daddr: 0
-[ 1717.581214] struct sock_common.skc_rcv_saddr: 4
-[ 1717.581498] struct sock_common.skc_dport: 12
-[ 1717.581625] struct sock_common.skc_num: 14
-[ 1717.581774] struct sock_common.skc_family: 16
-[ 1717.581906] struct sock_common.skc_state: 18
-[ 1717.582122] =============
-[ 1717.582122] struct tcp_skb_cb: 48
-[ 1717.582280] struct tcp_skb_cb.seq: 0
-[ 1717.582368] struct tcp_skb_cb.tcp_flags: 12
-[ 1717.583837] =============
-[ 1717.583837] struct __sk_buff: 192
-[ 1717.584083] struct __sk_buff.data: 76
-[ 1717.584177] struct __sk_buff.data_end: 80
-[ 1717.584346] =============
-[ 1717.584346] struct netdev_queue: 256
-[ 1717.584511] struct netdev_queue.trans_start: 72
-[ 1717.584618] struct netdev_queue.state: 76
-[ 1717.584856] =============
-[ 1717.584856] struct net_device: 1408
-[ 1717.584985] struct net_device.ifindex: 128
-[ 1717.585074] struct net_device.name: 0
-[ 1717.585288] =============
-[ 1717.585288] struct qdisc_skb_head: 16
-[ 1717.585552] struct qdisc_skb_head.qlen: 8
-[ 1717.585750] =============
-[ 1717.585750] struct Qdisc: 256
-[ 1717.586116] struct Qdisc.flags: 8
-[ 1717.586250] struct Qdisc.dev_queue: 40
-[ 1717.586419] struct Qdisc.q: 80
-[ 1717.586528] =============
-[ 1717.586528] struct sk_buff: 176
-[ 1717.586801] struct sk_buff.dev: 8
-[ 1717.586914] struct sk_buff.sk: 12
-[ 1717.587028] struct sk_buff.cb: 24
-[ 1717.587139] struct sk_buff.skb_iif: 112
-[ 1717.587269] struct sk_buff.protocol: 140
-[ 1717.587433] struct sk_buff.transport_header: 142
-[ 1717.587598] struct sk_buff.network_header: 144
-[ 1717.587769] struct sk_buff.mac_header: 146
-[ 1717.587911] struct sk_buff.head: 156
-[ 1717.588189] =============
-[ 1717.588189] struct sk_buff_head: 16
-[ 1717.588386] struct sk_buff_head.qlen: 8
-[ 1717.588545] =============
-[ 1717.588545] struct socket: 128
-[ 1717.588877] struct socket.sk: 16
-[ 1717.589031] =============
-[ 1717.589031] struct sock: 496
-[ 1717.589264] struct sock.__sk_common: 0
-[ 1717.589521] struct sock.sk_receive_queue: 136
-[ 1717.589721] struct sock.sk_write_queue: 228
-[ 1717.589872] struct sock.sk_protocol: 340
+[ 9221.738380] =============
+[ 9221.738380] struct tcp_sock: 1728
+[ 9221.738770] struct tcp_sock::retrans_out     offset = 1256, size =    4
+[ 9221.739017] struct tcp_sock::rcv_nxt         offset = 1008, size =    4
+[ 9221.739972] struct tcp_sock::snd_una         offset = 1052, size =    4
+[ 9221.740225] struct tcp_sock::packets_out     offset = 1252, size =    4
+[ 9221.740429] =============
+[ 9221.740429] struct timer_list: 20
+[ 9221.741235] struct timer_list::expires         offset =    8, size =    4
+[ 9221.742028] =============
+[ 9221.742028] struct inet_connection_sock: 984
+[ 9221.742257] struct inet_connection_sock::icsk_timeout    offset =  740, size =    4
+[ 9221.745069] struct inet_connection_sock::icsk_retransmit_timer offset =  744, size =   20
+[ 9221.745589] struct inet_connection_sock::icsk_retransmits offset =  825, size =    1
+[ 9221.747661] struct inet_connection_sock::icsk_pending    offset =  826, size =    1
+[ 9221.747948] =============
+[ 9221.747948] struct sock_common: 80
+[ 9221.748120] struct sock_common::skc_daddr       offset =    0, size =    4
+[ 9221.748381] struct sock_common::skc_rcv_saddr   offset =    4, size =    4
+[ 9221.748588] struct sock_common::skc_dport       offset =   12, size =    2
+[ 9221.748841] struct sock_common::skc_num         offset =   14, size =    2
+[ 9221.749177] struct sock_common::skc_family      offset =   16, size =    2
+[ 9221.750654] struct sock_common::skc_state       offset =   18, size =    1
+[ 9221.750853] =============
+[ 9221.750853] struct tcp_skb_cb: 48
+[ 9221.751023] struct tcp_skb_cb::seq             offset =    0, size =    4
+[ 9221.752295] struct tcp_skb_cb::tcp_flags       offset =   12, size =    1
+[ 9221.752648] =============
+[ 9221.752648] struct __sk_buff: 192
+[ 9221.752855] struct __sk_buff::data            offset =   76, size =    4
+[ 9221.754008] struct __sk_buff::data_end        offset =   80, size =    4
+[ 9221.754386] =============
+[ 9221.754386] struct netdev_queue: 256
+[ 9221.754699] struct netdev_queue::trans_start     offset =   72, size =    4
+[ 9221.755747] struct netdev_queue::state           offset =   76, size =    4
+[ 9221.755997] =============
+[ 9221.755997] struct net_device: 1408
+[ 9221.756298] struct net_device::ifindex         offset =  128, size =    4
+[ 9221.756643] struct net_device::name            offset =    0, size =   16
+[ 9221.757148] =============
+[ 9221.757148] struct qdisc_skb_head: 16
+[ 9221.757290] struct qdisc_skb_head::qlen            offset =    8, size =    4
+[ 9221.757636] =============
+[ 9221.757636] struct Qdisc: 256
+[ 9221.757816] struct Qdisc::flags           offset =    8, size =    4
+[ 9221.758031] struct Qdisc::dev_queue       offset =   40, size =    4
+[ 9221.758820] struct Qdisc::q               offset =   80, size =   16
+[ 9221.758999] =============
+[ 9221.758999] struct sk_buff: 176
+[ 9221.759179] struct sk_buff::dev             offset =    8, size =    4
+[ 9221.759371] struct sk_buff::sk              offset =   12, size =    4
+[ 9221.759563] struct sk_buff::cb              offset =   24, size =   48
+[ 9221.759760] struct sk_buff::skb_iif         offset =  112, size =    4
+[ 9221.759937] struct sk_buff::protocol        offset =  140, size =    2
+[ 9221.761077] struct sk_buff::transport_header offset =  142, size =    2
+[ 9221.761319] struct sk_buff::network_header  offset =  144, size =    2
+[ 9221.761562] struct sk_buff::mac_header      offset =  146, size =    2
+[ 9221.761827] struct sk_buff::head            offset =  156, size =    4
+[ 9221.762042] =============
+[ 9221.762042] struct sk_buff_head: 16
+[ 9221.762288] struct sk_buff_head::qlen            offset =    8, size =    4
+[ 9221.762501] =============
+[ 9221.762501] struct socket: 128
+[ 9221.762895] struct socket::sk              offset =   16, size =    4
+[ 9221.763081] =============
+[ 9221.763081] struct sock: 496
+[ 9221.763211] struct sock::__sk_common     offset =    0, size =   80
+[ 9221.764773] struct sock::sk_receive_queue offset =  136, size =   16
+[ 9221.765153] struct sock::sk_write_queue  offset =  228, size =   16
+[ 9221.765674] struct sock::sk_protocol     offset =  340, size =    2

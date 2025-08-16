@@ -12,81 +12,92 @@
 #include <net/sch_generic.h>
 #include <net/tcp.h>
 
+#define PRINT_MEMBER_OFFSET(struct_type, member)     \
+    printk("%s::%-15s offset = %4zu, size = %4zu\n", \
+           #struct_type, #member,                    \
+           offsetof(struct_type, member),            \
+           sizeof(((struct_type *)0)->member))
+
+#define PRINT_STRUCT_SIZE(struct_type) \
+    printk("=============\n%s: %zu\n", #struct_type, sizeof(struct_type));
+
 static void print_skb_offsets(void)
 {
-    printk("=============\nstruct tcp_sock: %zu\n", sizeof(struct tcp_sock));
-    printk("struct tcp_sock.retrans_out: %zu\n", offsetof(struct tcp_sock, retrans_out));
-    printk("struct tcp_sock.rcv_nxt: %zu\n", offsetof(struct tcp_sock, rcv_nxt));
-    printk("struct tcp_sock.snd_una: %zu\n", offsetof(struct tcp_sock, snd_una));
-    printk("struct tcp_sock.packets_out: %zu\n", offsetof(struct tcp_sock, packets_out));
+    PRINT_STRUCT_SIZE(struct tcp_sock);
+    PRINT_MEMBER_OFFSET(struct tcp_sock, retrans_out);
+    PRINT_MEMBER_OFFSET(struct tcp_sock, rcv_nxt);
+    PRINT_MEMBER_OFFSET(struct tcp_sock, snd_una);
+    PRINT_MEMBER_OFFSET(struct tcp_sock, packets_out);
 
-    printk("=============\nstruct timer_list: %zu\n", sizeof(struct timer_list));
-    printk("struct timer_list.expires: %zu\n", offsetof(struct timer_list, expires));
+    PRINT_STRUCT_SIZE(struct timer_list);
+    PRINT_MEMBER_OFFSET(struct timer_list, expires);
 
-    printk("=============\nstruct inet_connection_sock: %zu\n", sizeof(struct inet_connection_sock));
-    printk("struct inet_connection_sock.icsk_timeout: %zu\n", offsetof(struct inet_connection_sock, icsk_timeout));
-    printk("struct inet_connection_sock.icsk_retransmit_timer: %zu\n", offsetof(struct inet_connection_sock, icsk_retransmit_timer));
-    printk("struct inet_connection_sock.icsk_retransmits: %zu\n", offsetof(struct inet_connection_sock, icsk_retransmits));
-    printk("struct inet_connection_sock.icsk_pending: %zu\n", offsetof(struct inet_connection_sock, icsk_pending));
+    PRINT_STRUCT_SIZE(struct inet_connection_sock);
+    PRINT_MEMBER_OFFSET(struct inet_connection_sock, icsk_timeout);
+    PRINT_MEMBER_OFFSET(struct inet_connection_sock, icsk_retransmit_timer);
+    PRINT_MEMBER_OFFSET(struct inet_connection_sock, icsk_retransmits);
+    PRINT_MEMBER_OFFSET(struct inet_connection_sock, icsk_pending);
 
-    printk("=============\nstruct sock_common: %zu\n", sizeof(struct sock_common));
-    printk("struct sock_common.skc_daddr: %zu\n", offsetof(struct sock_common, skc_daddr));
-    printk("struct sock_common.skc_rcv_saddr: %zu\n", offsetof(struct sock_common, skc_rcv_saddr));
-    printk("struct sock_common.skc_dport: %zu\n", offsetof(struct sock_common, skc_dport));
-    printk("struct sock_common.skc_num: %zu\n", offsetof(struct sock_common, skc_num));
-    printk("struct sock_common.skc_family: %zu\n", offsetof(struct sock_common, skc_family));
-    printk("struct sock_common.skc_state: %zu\n", offsetof(struct sock_common, skc_state));
+    PRINT_STRUCT_SIZE(struct sock_common);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_daddr);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_rcv_saddr);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_dport);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_num);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_family);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_state);
 #if IS_ENABLED(CONFIG_IPV6)
-    printk("struct sock_common.skc_v6_daddr: %zu\n", offsetof(struct sock_common, skc_v6_daddr));
-    printk("struct sock_common.skc_v6_rcv_saddr: %zu\n", offsetof(struct sock_common, skc_v6_rcv_saddr));
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_v6_daddr);
+    PRINT_MEMBER_OFFSET(struct sock_common, skc_v6_rcv_saddr);
 #endif
 
-    printk("=============\nstruct tcp_skb_cb: %zu\n", sizeof(struct tcp_skb_cb));
-    printk("struct tcp_skb_cb.seq: %zu\n", offsetof(struct tcp_skb_cb, seq));
-    printk("struct tcp_skb_cb.tcp_flags: %zu\n", offsetof(struct tcp_skb_cb, tcp_flags));
+    PRINT_STRUCT_SIZE(struct tcp_skb_cb);
+    PRINT_MEMBER_OFFSET(struct tcp_skb_cb, seq);
+    PRINT_MEMBER_OFFSET(struct tcp_skb_cb, tcp_flags);
 
-    printk("=============\nstruct __sk_buff: %zu\n", sizeof(struct __sk_buff));
-    printk("struct __sk_buff.data: %zu\n", offsetof(struct __sk_buff, data));
-    printk("struct __sk_buff.data_end: %zu\n", offsetof(struct __sk_buff, data_end));
+    PRINT_STRUCT_SIZE(struct __sk_buff);
+    PRINT_MEMBER_OFFSET(struct __sk_buff, data);
+    PRINT_MEMBER_OFFSET(struct __sk_buff, data_end);
 
-    printk("=============\nstruct netdev_queue: %zu\n", sizeof(struct netdev_queue));
-    printk("struct netdev_queue.trans_start: %zu\n", offsetof(struct netdev_queue, trans_start));
-    printk("struct netdev_queue.state: %zu\n", offsetof(struct netdev_queue, state));
+    PRINT_STRUCT_SIZE(struct netdev_queue);
+    PRINT_MEMBER_OFFSET(struct netdev_queue, trans_start);
+    PRINT_MEMBER_OFFSET(struct netdev_queue, state);
 
-    printk("=============\nstruct net_device: %zu\n", sizeof(struct net_device));
-    printk("struct net_device.ifindex: %zu\n", offsetof(struct net_device, ifindex));
-    printk("struct net_device.name: %zu\n", offsetof(struct net_device, name));
+    PRINT_STRUCT_SIZE(struct net_device);
+    PRINT_MEMBER_OFFSET(struct net_device, ifindex);
+    PRINT_MEMBER_OFFSET(struct net_device, name);
 
-    printk("=============\nstruct qdisc_skb_head: %zu\n", sizeof(struct qdisc_skb_head));
-    printk("struct qdisc_skb_head.qlen: %zu\n", offsetof(struct qdisc_skb_head, qlen));
+    PRINT_STRUCT_SIZE(struct qdisc_skb_head);
+    PRINT_MEMBER_OFFSET(struct qdisc_skb_head, qlen);
 
-    printk("=============\nstruct Qdisc: %zu\n", sizeof(struct Qdisc));
-    printk("struct Qdisc.flags: %zu\n", offsetof(struct Qdisc, flags));
-    printk("struct Qdisc.dev_queue: %zu\n", offsetof(struct Qdisc, dev_queue));
-    printk("struct Qdisc.q: %zu\n", offsetof(struct Qdisc, q));
+    PRINT_STRUCT_SIZE(struct Qdisc);
+    PRINT_MEMBER_OFFSET(struct Qdisc, flags);
+    PRINT_MEMBER_OFFSET(struct Qdisc, dev_queue);
+    PRINT_MEMBER_OFFSET(struct Qdisc, q);
 
-    printk("=============\nstruct sk_buff: %zu\n", sizeof(struct sk_buff));
-    printk("struct sk_buff.dev: %zu\n", offsetof(struct sk_buff, dev));
-    printk("struct sk_buff.sk: %zu\n", offsetof(struct sk_buff, sk));
-    printk("struct sk_buff.cb: %zu\n", offsetof(struct sk_buff, cb));
-    printk("struct sk_buff.skb_iif: %zu\n", offsetof(struct sk_buff, skb_iif));
-    printk("struct sk_buff.protocol: %zu\n", offsetof(struct sk_buff, protocol));
-    printk("struct sk_buff.transport_header: %zu\n", offsetof(struct sk_buff, transport_header));
-    printk("struct sk_buff.network_header: %zu\n", offsetof(struct sk_buff, network_header));
-    printk("struct sk_buff.mac_header: %zu\n", offsetof(struct sk_buff, mac_header));
-    printk("struct sk_buff.head: %zu\n", offsetof(struct sk_buff, head));
+    PRINT_STRUCT_SIZE(struct sk_buff);
+    PRINT_MEMBER_OFFSET(struct sk_buff, dev);
+    PRINT_MEMBER_OFFSET(struct sk_buff, sk);
+    PRINT_MEMBER_OFFSET(struct sk_buff, cb);
+    PRINT_MEMBER_OFFSET(struct sk_buff, skb_iif);
+    PRINT_MEMBER_OFFSET(struct sk_buff, protocol);
+    PRINT_MEMBER_OFFSET(struct sk_buff, transport_header);
+    PRINT_MEMBER_OFFSET(struct sk_buff, network_header);
+    PRINT_MEMBER_OFFSET(struct sk_buff, mac_header);
+    PRINT_MEMBER_OFFSET(struct sk_buff, head);
 
-    printk("=============\nstruct sk_buff_head: %zu\n", sizeof(struct sk_buff_head));
-    printk("struct sk_buff_head.qlen: %zu\n", offsetof(struct sk_buff_head, qlen));
 
-    printk("=============\nstruct socket: %zu\n", sizeof(struct socket));
-    printk("struct socket.sk: %zu\n", offsetof(struct socket, sk));
+    PRINT_STRUCT_SIZE(struct sk_buff_head);
+    PRINT_MEMBER_OFFSET(struct sk_buff_head, qlen);
 
-    printk("=============\nstruct sock: %zu\n", sizeof(struct sock));
-    printk("struct sock.__sk_common: %zu\n", offsetof(struct sock, __sk_common));
-    printk("struct sock.sk_receive_queue: %zu\n", offsetof(struct sock, sk_receive_queue));
-    printk("struct sock.sk_write_queue: %zu\n", offsetof(struct sock, sk_write_queue));
-    printk("struct sock.sk_protocol: %zu\n", offsetof(struct sock, sk_protocol));
+
+    PRINT_STRUCT_SIZE(struct socket);
+    PRINT_MEMBER_OFFSET(struct socket, sk);
+
+    PRINT_STRUCT_SIZE(struct sock);
+    PRINT_MEMBER_OFFSET(struct sock, __sk_common);
+    PRINT_MEMBER_OFFSET(struct sock, sk_receive_queue);
+    PRINT_MEMBER_OFFSET(struct sock, sk_write_queue);
+    PRINT_MEMBER_OFFSET(struct sock, sk_protocol);
 }
 
 static int __init skb_offset_init(void)
