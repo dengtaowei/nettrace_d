@@ -1,5 +1,7 @@
-CC ?= $(CROSS_COMPILE)gcc
-TARGET = hello
+CROSS_COMPILE=arm-linux-gnueabi-
+CC = $(CROSS_COMPILE)gcc
+ARCH=arm
+TARGET = kprobe
 ARCH ?= $(shell uname -m | sed 's/x86_64/x86/' \
 			 | sed 's/arm.*/arm/' \
 			 | sed 's/aarch64/arm64/' \
@@ -22,6 +24,11 @@ app: $(TARGET) $(BPF_OBJ)
 
 $(TARGET): $(USER_C) $(USER_SKEL) $(COMMON_H)
 	$(CC) -Wall -O0 -g3 -DBPF_DEBUG -DNO_BTF -o $(TARGET) $(USER_C) --static -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
+
+direct:
+	cp ~/Desktop/nfs_share/$(USER_SKEL) ./
+	$(CC) -Wall -O0 -g3 -DBPF_DEBUG -DNO_BTF -o $(TARGET) $(USER_C) --static -L../../3rdparty/install/$(ARCH)/lib -l:libbpf.a -lelf -lz
+	cp $(TARGET) ~/Desktop/nfs_share
 
 NOSTDINC_FLAGS	+= -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 
@@ -47,6 +54,7 @@ NOSTDINC_FLAGS	+= -nostdinc -isystem $(shell $(CC) -print-file-name=include)
 
 $(USER_SKEL): $(BPF_OBJ)
 	bpftool gen skeleton $< > $@
+	cp $< ~/Desktop/nfs_share
 
 vmlinux.h:
 # 	bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h

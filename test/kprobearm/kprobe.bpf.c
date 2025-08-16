@@ -1,5 +1,5 @@
 // #include "vmlinux.h"
-#include "/home/anlan/Desktop/nettrace_d/nettrace_d/src/progs/kheaders/arm/vmlinux.h"
+#include "/home/anlan/Desktop/nettrace_d/src/progs/kheaders/arm/vmlinux.h"
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
@@ -698,13 +698,13 @@ static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
 		struct tcp_sock *tp = (void *)sk;
 
 		if (bpf_core_type_exists(struct tcp_sock)) {
-			ske->l4.tcp.packets_out = _C(tp, packets_out);
-			ske->l4.tcp.retrans_out = _C(tp, retrans_out);
-			ske->l4.tcp.snd_una = _C(tp, snd_una);
+			// ske->l4.tcp.packets_out = _C(tp, packets_out);
+			// ske->l4.tcp.retrans_out = _C(tp, retrans_out);
+			// ske->l4.tcp.snd_una = _C(tp, snd_una);
 		} else {
-			ske->l4.tcp.packets_out = _(tp->packets_out);
-			ske->l4.tcp.retrans_out = _(tp->retrans_out);
-			ske->l4.tcp.snd_una = _(tp->snd_una);
+			// ske->l4.tcp.packets_out = _(tp->packets_out);
+			// ske->l4.tcp.retrans_out = _(tp->retrans_out);
+			// ske->l4.tcp.snd_una = _(tp->snd_una);
 		}
 	}
 	case IPPROTO_UDP:
@@ -729,21 +729,21 @@ static inline int probe_parse_sk(struct sock *sk, sock_t *ske,
 		return 0;
 
 	icsk = (void *)sk;
-	bpf_probe_read_kernel(&ske->ca_state, sizeof(u8),
-		(u8 *)icsk +
-		bpf_core_field_offset(struct inet_connection_sock,
-			icsk_retransmits) -
-		1);
+	// bpf_probe_read_kernel(&ske->ca_state, sizeof(u8),
+	// 	(u8 *)icsk +
+	// 	bpf_core_field_offset(struct inet_connection_sock,
+	// 		icsk_retransmits) -
+	// 	1);
 
-	if (bpf_core_helper_exist(jiffies64)) {
-		if (bpf_core_field_exists(icsk->icsk_timeout))
-			tmo = _C(icsk, icsk_timeout);
-		else
-			tmo = _C(icsk, icsk_retransmit_timer.expires);
-		ske->timer_out = tmo - (unsigned long)bpf_jiffies64();
-	}
+	// if (bpf_core_helper_exist(jiffies64)) {
+	// 	if (bpf_core_field_exists(icsk->icsk_timeout))
+	// 		tmo = _C(icsk, icsk_timeout);
+	// 	else
+	// 		tmo = _C(icsk, icsk_retransmit_timer.expires);
+	// 	ske->timer_out = tmo - (unsigned long)bpf_jiffies64();
+	// }
 
-	ske->timer_pending = _C(icsk, icsk_pending);
+	// ske->timer_pending = _C(icsk, icsk_pending);
 
 	return 0;
 err:
@@ -800,16 +800,16 @@ static inline int probe_parse_l4(void *l4, packet_t *pkt, pkt_args_t *args)
 			return -1;
 		pkt->l4.icmp.code = _(icmp->code);
 		pkt->l4.icmp.type = _(icmp->type);
-		pkt->l4.icmp.seq = _(icmp->un.echo.sequence);
-		pkt->l4.icmp.id = _(icmp->un.echo.id);
+		// pkt->l4.icmp.seq = _(icmp->un.echo.sequence);
+		// pkt->l4.icmp.id = _(icmp->un.echo.id);
 		break;
 	}
 	case IPPROTO_ESP: {
 		struct ip_esp_hdr *esp_hdr = l4;
 		if (filter_any_enabled(args, port))
 			return -1;
-		pkt->l4.espheader.seq = _(esp_hdr->seq_no);
-		pkt->l4.espheader.spi = _(esp_hdr->spi);
+		// pkt->l4.espheader.seq = _(esp_hdr->seq_no);
+		// pkt->l4.espheader.spi = _(esp_hdr->spi);
 		break;
 	}
 	default:
@@ -897,12 +897,12 @@ static inline int probe_parse_skb_sk(struct sock *sk, struct sk_buff *skb,
 		struct tcp_skb_cb *cb;
 
 		cb = skb_cb(skb);
-		pkt->l4.tcp.seq = _C(cb, seq);
-		pkt->l4.tcp.flags = _C(cb, tcp_flags);
-		if (bpf_core_type_exists(struct tcp_sock))
-			pkt->l4.tcp.ack = _C(tp, rcv_nxt);
-		else
-			pkt->l4.tcp.ack = _(tp->rcv_nxt);
+		// pkt->l4.tcp.seq = _C(cb, seq);
+		// pkt->l4.tcp.flags = _C(cb, tcp_flags);
+		// if (bpf_core_type_exists(struct tcp_sock))
+		// 	pkt->l4.tcp.ack = _C(tp, rcv_nxt);
+		// else
+		// 	pkt->l4.tcp.ack = _(tp->rcv_nxt);
 	}
 	case IPPROTO_UDP:
 		pkt->l4.min.sport = bpf_htons(_C(skc, skc_num));
@@ -1180,7 +1180,7 @@ static int auto_inline handle_entry(context_info_t *info)
 			pr_bpf_debug("no skb available, func=%d", info->func);
 			goto err;
 		}
-		err = probe_parse_skb(skb, info->sk, pkt, pkt_args);
+		// err = probe_parse_skb(skb, info->sk, pkt, pkt_args);
 	}
 
 	if (err)
@@ -1203,8 +1203,8 @@ no_filter:
 
 	bpf_get_current_comm(detail->task, sizeof(detail->task));
 	if (dev) {
-		bpf_core_read_str(detail->ifname, sizeof(detail->ifname) - 1,
-				  &dev->name);
+		// bpf_core_read_str(detail->ifname, sizeof(detail->ifname) - 1,
+				//   &dev->name);
 		detail->ifindex = _C(dev, ifindex);
 	} else {
 		detail->ifindex = _C(skb, skb_iif);

@@ -1,4 +1,4 @@
-#include "/home/anlan/Desktop/nettrace_d/nettrace_d/src/progs/kheaders/arm/vmlinux.h"
+#include "/home/anlan/Desktop/nettrace_d/src/progs/kheaders/arm/vmlinux.h"
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
@@ -316,7 +316,7 @@ static __always_inline int check_rate_limit(bpf_args_t *args)
 
 	if (budget <= 0) {
 		ts = bpf_ktime_get_ns();
-		// budget = (((ts - last_ts) / 1000000) * limit) / 1000;  // 不知道为什么，有这一行arm32加载失败
+		budget = (((ts - last_ts) / 1000000) * limit) / 1000;  // 不知道为什么，有这一行arm32加载失败
 		budget = budget < limit ? budget : limit;
 		if (budget <= 0)
 			return -1;
@@ -512,12 +512,12 @@ static __always_inline void update_stats_log(u32 val)
 
 static inline void init_ctx_match(void *skb, u16 func, bool ts)
 {
-	// match_val_t matched = {
-	// 	.ts1 = ts ? bpf_ktime_get_ns() / 1000 : 0,
-	// 	.func1 = func,
-	// };
+	match_val_t matched = {
+		.ts1 = ts ? bpf_ktime_get_ns() / 1000 : 0,
+		.func1 = func,
+	};
 
-	// bpf_map_update_elem(&m_matched, &skb, &matched, 0);
+	bpf_map_update_elem(&m_matched, &skb, &matched, 0);
 }
 
 static inline int pre_handle_latency(context_info_t *info,
@@ -529,14 +529,14 @@ static inline int pre_handle_latency(context_info_t *info,
 	if (match_val) {
 		if (args->latency_free || !func_is_free(info->func_status) ||
 		    func_is_cfree(info->func_status)) {
-			// match_val->ts2 = bpf_ktime_get_ns() / 1000;  // dtwdebug
+			match_val->ts2 = bpf_ktime_get_ns() / 1000;
 			match_val->func2 = info->func;
 		}
 
 		/* reentry the matcher, or the free of skb is not traced. */
 		if (info->func_status & FUNC_STATUS_MATCHER &&
 		    match_val->func1 == info->func)
-			// match_val->ts1 = bpf_ktime_get_ns() / 1000;  // dtwdebug
+			match_val->ts1 = bpf_ktime_get_ns() / 1000;  // dtwdebug
 
 		if (func_is_free(info->func_status)) {
 			delta = match_val->ts2 - match_val->ts1;
