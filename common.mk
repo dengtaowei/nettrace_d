@@ -8,9 +8,10 @@ BPF_CFLAGS	= $(CFLAGS) -Wno-unused-function			\
 # endif
 
 HOST_CFLAGS	= \
-		-L$(ROOT)/3rdparty/install/$(ARCH)/lib -lbpf -lelf -lz $(LIBELF_ZSTD_FLAGS) -O2 -static $(CFLAGS) -Wall \
+		-L$(ROOT)/3rdparty/install/$(ARCH)/lib -lbpf -lelf -lz -lpthread $(LIBELF_ZSTD_FLAGS) -O2 -static $(CFLAGS) -Wall \
 		-Wno-deprecated-declarations -DVERSION=$(VERSION)	\
 		-DRELEASE=$(RELEASE)					\
+		-I$(ROOT)/3rdparty/libbpf-1.1.0/include/uapi/ \
 		-I$(ROOT)/shared/ -I$(ROOT)/utils
 
 CC		:= $(CROSS_COMPILE)gcc

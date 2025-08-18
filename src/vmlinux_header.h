@@ -37,7 +37,7 @@
 #elif defined(__TARGET_ARCH_arm)
 #include "./progs/kheaders/arm/kheaders_arm.h"
 #elif defined(__TARGET_ARCH_arm64)
-#include "./progs/vmlinux_arm64.h"
+#include "./progs/kheaders/arm64/kstruct_offset.h"
 #elif defined(__TARGET_ARCH_loongarch)
 #include "./progs/vmlinux_loongarch64.h"
 #endif

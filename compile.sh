@@ -44,7 +44,10 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc 3rdpar
 make NO_BTF=1 NO_GLOBAL_DATA=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc KERNEL=/home/anlan/Desktop/perf/linux-6.6.23 install
 
 
-
+make NO_BTF=1 NO_GLOBAL_DATA=1 BPF_MAKE_HEADERS=1 \
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc \
+    KERNEL=/home/anlan/Desktop/nettrace_d/nettrace_d/src/progs/kheaders/arm64 \
+    install
 
 
 # kernel
