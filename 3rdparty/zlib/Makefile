@@ -12,7 +12,7 @@
 # To install in $HOME instead of /usr/local, use:
 #    make install prefix=$HOME
 
-CC=$(CROSS_COMPILE)gcc -mfloat-abi=soft
+CC=$(CROSS_COMPILE)gcc
 GCOV=gcov
 LLVM_GCOV_FLAG=
 
@@ -25,7 +25,7 @@ CFLAGS=-O3 -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 SFLAGS=-O3 -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 LDFLAGS=
 TEST_LIBS=-L. libz.a
-LDSHARED=$(CROSS_COMPILE)gcc -mfloat-abi=soft -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
+LDSHARED=$(CROSS_COMPILE)gcc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
 CPP=
 
 STATICLIB=libz.a
