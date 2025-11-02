@@ -53,14 +53,14 @@ typedef __u64 __addrpair;
 
 typedef __u32 __portpair;
 
-// typedef _Bool bool;
+typedef _Bool bool;
 
-typedef enum { false, true } bool;
+// typedef enum { false, true } bool;
 
-// enum {
-// 	false = 0,
-// 	true = 1,
-// };
+enum {
+	false = 0,
+	true = 1,
+};
 
 
 enum bpf_map_type {
