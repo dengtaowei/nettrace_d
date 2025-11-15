@@ -78,6 +78,10 @@ children:
       rules:
       - <<: *rule_msg
         msg: skb is successfully sent to the NIC driver
+    - name: fp_send_data_pkt:2
+      rules:
+      - <<: *rule_msg
+        msg: skb is successfully sent to the WiFi driver
   - name: sched
     desc: TC(traffic control) module
     visual: true
