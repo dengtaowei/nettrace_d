@@ -214,7 +214,7 @@ static inline int filter_icmpv6_type(pkt_args_t *args, u16 type)
 	if (!args)
 		return 0;
 
-	return (args->icmpv6_type != type);
+	return (args->icmpv6_type && args->icmpv6_type != type);
 }
 
 struct arphdr_all {
