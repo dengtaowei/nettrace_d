@@ -54,6 +54,16 @@ static void ntomac(u8 mac[], char *dst)
 	}
 }
 
+/*
+ *	ICMP codes for neighbour discovery messages
+ */
+
+#define NDISC_ROUTER_SOLICITATION	133
+#define NDISC_ROUTER_ADVERTISEMENT	134
+#define NDISC_NEIGHBOUR_SOLICITATION	135
+#define NDISC_NEIGHBOUR_ADVERTISEMENT	136
+#define NDISC_REDIRECT			137
+
 void ts_print_packet(char *buf, packet_t *pkt, char *minfo,
 		     bool date_format)
 {
@@ -163,6 +173,21 @@ void ts_print_packet(char *buf, packet_t *pkt, char *minfo,
 			break;
 		case ICMPV6_EXT_ECHO_REPLY:
 			BUF_FMT(" ping reply(ext), ");
+			break;
+		case NDISC_ROUTER_SOLICITATION:
+			BUF_FMT(" router solicitation, ");
+			break;
+		case NDISC_ROUTER_ADVERTISEMENT:
+			BUF_FMT(" router advertisement, ");
+			break;
+		case NDISC_NEIGHBOUR_SOLICITATION:
+			BUF_FMT(" neighbour solicitation, ");
+			break;
+		case NDISC_NEIGHBOUR_ADVERTISEMENT:
+			BUF_FMT(" neighbour advertisement, ");
+			break;
+		case NDISC_REDIRECT:
+			BUF_FMT(" redirect, ");
 			break;
 		}
 		BUF_FMT("seq: %u, id: %u", ntohs(pkt->l4.icmp.seq),

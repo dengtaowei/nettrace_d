@@ -72,6 +72,12 @@ static void do_parse_args(int argc, char *argv[])
 			.desc = "filter source or dest TCP/UDP port",
 		},
 		{
+			.lname = "icmpv6_type",
+			.dest = &pkt_args->icmpv6_type,
+			.type = OPTION_U16,
+			.desc = "filter icmpv6 type",
+		},
+		{
 			.lname = "proto",
 			.sname = 'p',
 			.dest = &proto,

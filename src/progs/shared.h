@@ -32,7 +32,7 @@ typedef struct {
 	u64  __last_update;
 	u8   trace_status[TRACE_MAX];
 	u64  event_count;
-} bpf_args_t;
+} __attribute__((__packed__)) bpf_args_t;
 
 typedef struct {
 	u16		meta;

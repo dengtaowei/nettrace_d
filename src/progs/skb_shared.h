@@ -179,6 +179,7 @@ typedef struct {
 	u16	sport;
 	u16	dport;
 	u16	port;
+	u16 icmpv6_type;
 	u16	l3_proto;
 	u8	l4_proto;
 	u8	tcp_flags;
@@ -189,7 +190,7 @@ typedef struct {
 #ifdef BPF_DEBUG
 	bool	bpf_debug;
 #endif
-} pkt_args_t;
+} __attribute__((__packed__)) pkt_args_t;
 
 #define args_check(args, attr, value) (args->attr && args->attr != value)
 

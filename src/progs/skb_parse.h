@@ -209,6 +209,14 @@ static inline int filter_port(pkt_args_t *args, u32 sport, u32 dport)
 	       (args->port && args->port != dport && args->port != sport);
 }
 
+static inline int filter_icmpv6_type(pkt_args_t *args, u16 type)
+{
+	if (!args)
+		return 0;
+
+	return (args->icmpv6_type != type);
+}
+
 struct arphdr_all {
 	__be16		ar_hrd;
 	__be16		ar_pro;
@@ -282,8 +290,10 @@ static inline int probe_parse_l4(void *l4, packet_t *pkt, pkt_args_t *args)
 	case IPPROTO_ICMPV6:
 	case IPPROTO_ICMP: {
 		struct icmphdr *icmp = l4;
-
+		u16 type = _(icmp->type);
 		if (filter_any_enabled(args, port))
+			return -1;
+		if (filter_icmpv6_type(args, type))
 			return -1;
 		pkt->l4.icmp.code = _(icmp->code);
 		pkt->l4.icmp.type = _(icmp->type);
