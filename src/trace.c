@@ -368,6 +368,25 @@ static int trace_parse_traces(char *traces, int target)
 	return 0;
 }
 
+static int trace_parse_icmpv6_type(char *traces, unsigned char *target, int len)
+{
+	char *tmp, *cur;
+	int i = 0;
+	if (!traces)
+		return 0;
+
+	tmp = calloc(strlen(traces) + 1, 1);
+	strcpy(tmp, traces);
+	cur = strtok(tmp, ",");
+	while (cur && i < len) {
+		target[i++] = (unsigned char)atoi(cur);
+		cur = strtok(NULL, ",");
+	}
+	free(tmp);
+
+	return 0;
+}
+
 static int parse_tcp_flasg(char *flags_str)
 {
 	u8 flags = 0;
@@ -517,6 +536,11 @@ static int trace_prepare_args()
 		}
 		trace_parse_traces(args->trace_matcher, 3);
 		bpf_args->match_mode = true;
+	}
+
+	if (args->icmpv6_type) {
+		bpf_args->pkt.icmpv6_type = 0;
+		trace_parse_icmpv6_type(args->icmpv6_type, (unsigned char *)&(bpf_args->pkt.icmpv6_type), sizeof(bpf_args->pkt.icmpv6_type));
 	}
 
 	if (args->trace_free) {

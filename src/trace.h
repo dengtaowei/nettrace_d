@@ -120,6 +120,7 @@ typedef struct trace_args {
 	char *traces;
 	char *traces_stack;
 	char *trace_matcher;
+	char *icmpv6_type;
 	char *trace_exclude;
 	char *trace_free;
 	char *pkt_len;

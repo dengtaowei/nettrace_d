@@ -73,8 +73,8 @@ static void do_parse_args(int argc, char *argv[])
 		},
 		{
 			.lname = "icmpv6_type",
-			.dest = &pkt_args->icmpv6_type,
-			.type = OPTION_U16,
+			.dest = &trace_args->icmpv6_type,
+			.type = OPTION_STRING,
 			.desc = "filter icmpv6 type",
 		},
 		{

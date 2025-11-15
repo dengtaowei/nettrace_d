@@ -179,7 +179,7 @@ typedef struct {
 	u16	sport;
 	u16	dport;
 	u16	port;
-	u16 icmpv6_type;
+	u32 icmpv6_type;
 	u16	l3_proto;
 	u8	l4_proto;
 	u8	tcp_flags;
