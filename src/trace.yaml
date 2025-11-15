@@ -63,6 +63,7 @@ children:
     - name: __netif_receive_skb_core:0
       tp: net/netif_receive_skb
       skboffset: 8
+    - name: RtmpOsPktRcvHandle:0
   - name: link-out
     desc: link layer (L2) of packet out
     visual: true
