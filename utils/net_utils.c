@@ -47,6 +47,7 @@ static proto_item_t l3_protos[] = {
 	{ "pause",	0x8808 },
 	{ "slow",	0x8809 },
 	{ "wccp",	0x883E },
+	{ "ieee1905",  0x893a},
 };
 
 static proto_item_t l4_protos[] = {
