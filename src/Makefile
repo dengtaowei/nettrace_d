@@ -52,7 +52,7 @@ ifneq ($(call str_count,include/uapi/linux/bpf.h,get_stackid),0)
 endif
 
 ifneq ($(call str_count,include/net/sock.h,sk_protocol.*8),0)
-	BPF_CFLAGS += -D__F_SK_PRPTOCOL_LEGACY
+	# BPF_CFLAGS += -D__F_SK_PRPTOCOL_LEGACY
 endif
 
 ifeq ($(call str_count,include/net/sock.h,__sk_flags_offset),0)
