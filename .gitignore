@@ -13,3 +13,4 @@ build*.sh
 release.sh
 compile_commands.json
 testing
+3rdparty/install
