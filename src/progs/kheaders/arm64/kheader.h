@@ -1,260 +1,18 @@
-#ifndef __VMLINUX_H__
-#define __VMLINUX_H__
+#ifndef __GENERATED_STRUCTS_H__
+#define __GENERATED_STRUCTS_H__
 
-#ifndef BPF_NO_PRESERVE_ACCESS_INDEX
-#pragma clang attribute push (__attribute__((preserve_access_index)), apply_to = record)
-#endif
+/*
+ * 自动生成的结构体定义
+ * 注释格式: [起始偏移-结束偏移] 大小
+ */
 
-typedef signed char __s8;
-
-typedef unsigned char __u8;
-
-typedef short int __s16;
-
-typedef short unsigned int __u16;
-
-typedef int __s32;
-
-typedef unsigned int __u32;
-
-typedef long long int __s64;
-
-typedef long long unsigned int __u64;
-
-typedef __s8 s8;
-
-typedef __u8 u8;
-
-typedef __s16 s16;
-
-typedef __u16 u16;
-
-typedef __s32 s32;
-
-typedef __u32 u32;
-
-typedef __s64 s64;
-
-typedef __u64 u64;
-
-typedef __u16 __le16;
-
-typedef __u16 __be16;
-
-typedef __u32 __be32;
-
-typedef __u64 __be64;
-
-typedef __u32 __wsum;
-
-typedef __u16 __sum16;
-
-typedef __u64 __addrpair;
-
-typedef __u32 __portpair;
-
-typedef _Bool bool;
-
-// typedef enum { false, true } bool;
-
-enum {
-	false = 0,
-	true = 1,
-};
-
-
-enum bpf_map_type {
-	BPF_MAP_TYPE_UNSPEC = 0,
-	BPF_MAP_TYPE_HASH = 1,
-	BPF_MAP_TYPE_ARRAY = 2,
-	BPF_MAP_TYPE_PROG_ARRAY = 3,
-	BPF_MAP_TYPE_PERF_EVENT_ARRAY = 4,
-	BPF_MAP_TYPE_PERCPU_HASH = 5,
-	BPF_MAP_TYPE_PERCPU_ARRAY = 6,
-	BPF_MAP_TYPE_STACK_TRACE = 7,
-	BPF_MAP_TYPE_CGROUP_ARRAY = 8,
-	BPF_MAP_TYPE_LRU_HASH = 9,
-	BPF_MAP_TYPE_LRU_PERCPU_HASH = 10,
-	BPF_MAP_TYPE_LPM_TRIE = 11,
-	BPF_MAP_TYPE_ARRAY_OF_MAPS = 12,
-	BPF_MAP_TYPE_HASH_OF_MAPS = 13,
-	BPF_MAP_TYPE_DEVMAP = 14,
-	BPF_MAP_TYPE_SOCKMAP = 15,
-	BPF_MAP_TYPE_CPUMAP = 16,
-	BPF_MAP_TYPE_XSKMAP = 17,
-	BPF_MAP_TYPE_SOCKHASH = 18,
-	BPF_MAP_TYPE_CGROUP_STORAGE = 19,
-	BPF_MAP_TYPE_REUSEPORT_SOCKARRAY = 20,
-	BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE = 21,
-	BPF_MAP_TYPE_QUEUE = 22,
-	BPF_MAP_TYPE_STACK = 23,
-	BPF_MAP_TYPE_SK_STORAGE = 24,
-	BPF_MAP_TYPE_DEVMAP_HASH = 25,
-	BPF_MAP_TYPE_STRUCT_OPS = 26,
-	BPF_MAP_TYPE_RINGBUF = 27,
-	BPF_MAP_TYPE_INODE_STORAGE = 28,
-};
-
-enum {
-	BPF_F_INDEX_MASK = 4294967295,
-	BPF_F_CURRENT_CPU = 4294967295,
-	BPF_F_CTXLEN_MASK = 0,
-};
-
-enum {
-	IPPROTO_IP = 0,
-	IPPROTO_ICMP = 1,
-	IPPROTO_IGMP = 2,
-	IPPROTO_IPIP = 4,
-	IPPROTO_TCP = 6,
-	IPPROTO_EGP = 8,
-	IPPROTO_PUP = 12,
-	IPPROTO_UDP = 17,
-	IPPROTO_IDP = 22,
-	IPPROTO_TP = 29,
-	IPPROTO_DCCP = 33,
-	IPPROTO_IPV6 = 41,
-	IPPROTO_RSVP = 46,
-	IPPROTO_GRE = 47,
-	IPPROTO_ESP = 50,
-	IPPROTO_AH = 51,
-	IPPROTO_MTP = 92,
-	IPPROTO_BEETPH = 94,
-	IPPROTO_ENCAP = 98,
-	IPPROTO_PIM = 103,
-	IPPROTO_COMP = 108,
-	IPPROTO_SCTP = 132,
-	IPPROTO_UDPLITE = 136,
-	IPPROTO_MPLS = 137,
-	IPPROTO_RAW = 255,
-	IPPROTO_MAX = 256,
-};
-
-struct list_head {
-	struct list_head *next;
-	struct list_head *prev;
-};
-
-struct xt_table {
-	struct list_head list;
-	unsigned int valid_hooks;
-	struct xt_table_info *private;
-	struct module *me;
-	u8 af;
-	int priority;
-	int (*table_init)(struct net *);
-	const char name[32];
-};
-
-struct iphdr
-{
-    __u8 ihl : 4;
-    __u8 version : 4;
-    __u8 tos;
-    __be16 tot_len;
-    __be16 id;
-    __be16 frag_off;
-    __u8 ttl;
-    __u8 protocol;
-    __sum16 check;
-    union
-    {
-        struct
-        {
-            __be32 saddr;
-            __be32 daddr;
-        };
-        struct
-        {
-            __be32 saddr;
-            __be32 daddr;
-        } addrs;
-    };
-} __attribute__((__packed__));
-
-struct tcphdr
-{
-    __be16 source;
-    __be16 dest;
-    __be32 seq;
-    __be32 ack_seq;
-    __u16 res1 : 4;
-    __u16 doff : 4;
-    __u16 fin : 1;
-    __u16 syn : 1;
-    __u16 rst : 1;
-    __u16 psh : 1;
-    __u16 ack : 1;
-    __u16 urg : 1;
-    __u16 ece : 1;
-    __u16 cwr : 1;
-    __be16 window;
-    __sum16 check;
-    __be16 urg_ptr;
-} __attribute__((__packed__));
-
-struct udphdr
-{
-    __be16 source;
-    __be16 dest;
-    __be16 len;
-    __sum16 check;
-} __attribute__((__packed__));
-
-struct icmphdr
-{
-    __u8 type;
-    __u8 code;
-    __sum16 checksum;
-    union
-    {
-        struct
-        {
-            __be16 id;
-            __be16 sequence;
-        } echo;
-        __be32 gateway;
-        struct
-        {
-            __be16 __unused;
-            __be16 mtu;
-        } frag;
-        __u8 reserved[4];
-    } un;
-} __attribute__((__packed__));
-
-struct in6_addr
-{
-    union
-    {
-        __u8 u6_addr8[16];
-        __be16 u6_addr16[8];
-        __be32 u6_addr32[4];
-    } in6_u;
-} __attribute__((__packed__));
-
-struct ipv6hdr
-{
-    __u8 priority : 4;
-    __u8 version : 4;
-    __u8 flow_lbl[3];
-    __be16 payload_len;
-    __u8 nexthdr;
-    __u8 hop_limit;
-    union
-    {
-        struct
-        {
-            struct in6_addr saddr;
-            struct in6_addr daddr;
-        };
-        struct
-        {
-            struct in6_addr saddr;
-            struct in6_addr daddr;
-        } addrs;
-    };
-} __attribute__((__packed__));
+#include <linux/types.h>
+#include <linux/socket.h>
+#include <net/sock.h>
+#include <linux/timer.h>
+#include <linux/tcp.h>
+#include <linux/netdevice.h>
+#include <linux/skbuff.h>
 
 struct tcp_sock {
     unsigned char __padding1[1496]; /* [0-1495] 1496 bytes */
@@ -297,27 +55,12 @@ struct sock_common {
     unsigned char __padding3[48]; /* [88-135] 48 bytes */
 } __attribute__((__packed__)); /* total size: 136 bytes */
 
-struct ip_esp_hdr
-{
-    __be32 spi;
-    __be32 seq_no;
-    __u8 enc_data[0];
-};
-
-
 struct tcp_skb_cb {
     u32 seq; /* [0-3] 4 bytes */
     unsigned char __padding1[8]; /* [4-11] 8 bytes */
     u8 tcp_flags; /* [12-12] 1 bytes */
     unsigned char __padding2[35]; /* [13-47] 35 bytes */
 } __attribute__((__packed__)); /* total size: 48 bytes */
-
-struct ethhdr
-{
-    unsigned char h_dest[6];
-    unsigned char h_source[6];
-    __be16 h_proto;
-} __attribute__((__packed__));
 
 struct __sk_buff {
     unsigned char __padding1[76]; /* [0-75] 76 bytes */
@@ -340,12 +83,6 @@ struct net_device {
     unsigned char __padding2[2204]; /* [228-2431] 2204 bytes */
 } __attribute__((__packed__)); /* total size: 2432 bytes */
 
-struct nf_hook_state
-{
-    u8 hook; /*     0     1 */
-    u8 pf;   /*     1     1 */
-} __attribute__((__packed__));
-
 struct qdisc_skb_head {
     unsigned char __padding1[16]; /* [0-15] 16 bytes */
     unsigned int qlen; /* [16-19] 4 bytes */
@@ -356,49 +93,11 @@ struct Qdisc {
     unsigned char __padding1[16]; /* [0-15] 16 bytes */
     unsigned int flags; /* [16-19] 4 bytes */
     unsigned char __padding2[44]; /* [20-63] 44 bytes */
-    struct netdev_queue * dev_queue; /* [64-71] 8 bytes */
+    u64 dev_queue; /* [64-71] 8 bytes */
     unsigned char __padding3[80]; /* [72-151] 80 bytes */
     struct qdisc_skb_head q; /* [152-175] 24 bytes */
     unsigned char __padding4[208]; /* [176-383] 208 bytes */
 } __attribute__((__packed__)); /* total size: 384 bytes */
-
-typedef unsigned int nf_hookfn(void *, struct sk_buff *, const struct nf_hook_state *);
-
-struct nf_hook_entry {
-	nf_hookfn			*hook;
-	void				*priv;
-};
-
-struct nf_hook_entries
-{
-    u16 num_hook_entries;
-    struct nf_hook_entry hooks[0];
-} ;
-
-struct user_pt_regs {
-	__u64 regs[31];
-	__u64 sp;
-	__u64 pc;
-	__u64 pstate;
-};
-
-struct pt_regs {
-	union {
-		struct user_pt_regs user_regs;
-		struct {
-			u64 regs[31];
-			u64 sp;
-			u64 pc;
-			u64 pstate;
-		};
-	};
-	u64 orig_x0;
-	s32 syscallno;
-	u32 unused2;
-	u64 orig_addr_limit;
-	u64 pmr_save;
-	u64 stackframe[2];
-};
 
 struct sk_buff {
     unsigned char __padding1[16]; /* [0-15] 16 bytes */
@@ -424,15 +123,11 @@ struct sk_buff_head {
     unsigned char __padding2[4]; /* [20-23] 4 bytes */
 } __attribute__((__packed__)); /* total size: 24 bytes */
 
-struct sock;
-
 struct socket {
     unsigned char __padding1[24]; /* [0-23] 24 bytes */
     struct sock * sk; /* [24-31] 8 bytes */
     unsigned char __padding2[96]; /* [32-127] 96 bytes */
 } __attribute__((__packed__)); /* total size: 128 bytes */
-
-struct sock_common;
 
 struct sock {
     struct sock_common __sk_common; /* [0-135] 136 bytes */
@@ -445,4 +140,4 @@ struct sock {
     unsigned char __padding4[322]; /* [518-839] 322 bytes */
 } __attribute__((__packed__)); /* total size: 840 bytes */
 
-#endif
+#endif /* __GENERATED_STRUCTS_H__ */
